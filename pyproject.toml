@@ -5,9 +5,7 @@ description = "A categorized dataset of jokes with rich metadata"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [
-    { name = "Joke Emporium Contributors" }
-]
+authors = [{ name = "Joke Emporium Contributors" }]
 keywords = ["jokes", "humor", "dataset", "nlp", "comedy"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -18,20 +16,23 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Text Processing :: Linguistic",
 ]
 
-dependencies = [
-    "pydantic>=2.0.0",
-]
+dependencies = ["pydantic>=2.0.0"]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "ruff>=0.1.0",
-    "mypy>=1.0.0",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "pytest-sugar",
+    "uv",
+    "pymarkdownlnt",
+    "pytest-timeout",
 ]
 
 [project.urls]
@@ -49,7 +50,7 @@ packages = ["src/joke_emporium"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = [
@@ -66,7 +67,7 @@ ignore = [
 ]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.13"
 strict = true
 warn_return_any = true
 warn_unused_configs = true

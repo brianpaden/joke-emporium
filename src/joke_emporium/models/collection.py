@@ -15,46 +15,24 @@ class Collection(BaseModel):
     """
 
     # Collection metadata
-    name: str = Field(
-        ...,
-        description="Collection name (e.g., 'jokes_en_clean')"
-    )
-    version: str = Field(
-        ...,
-        description="Collection version (semantic versioning recommended)"
-    )
+    name: str = Field(..., description="Collection name (e.g., 'jokes_en_clean')")
+    version: str = Field(..., description="Collection version (semantic versioning recommended)")
     language: str = Field(
         ...,
         min_length=2,
         max_length=5,
-        description="ISO 639-1 language code (e.g., 'en', 'es', 'fr')"
+        description="ISO 639-1 language code (e.g., 'en', 'es', 'fr')",
     )
     maturity_filter: MaturityRating | None = Field(
-        default=None,
-        description="Maximum maturity rating in this collection (None = all ratings)"
+        default=None, description="Maximum maturity rating in this collection (None = all ratings)"
     )
-    description: str | None = Field(
-        default=None,
-        description="Description of this collection"
-    )
-    created_date: datetime = Field(
-        ...,
-        description="When this collection was created"
-    )
-    last_modified: datetime = Field(
-        ...,
-        description="When this collection was last updated"
-    )
-    metadata: dict | None = Field(
-        default=None,
-        description="Additional collection-level metadata"
-    )
+    description: str | None = Field(default=None, description="Description of this collection")
+    created_date: datetime = Field(..., description="When this collection was created")
+    last_modified: datetime = Field(..., description="When this collection was last updated")
+    metadata: dict | None = Field(default=None, description="Additional collection-level metadata")
 
     # The jokes
-    jokes: list[Joke] = Field(
-        default_factory=list,
-        description="List of jokes in this collection"
-    )
+    jokes: list[Joke] = Field(default_factory=list, description="List of jokes in this collection")
 
     # Computed statistics
     @computed_field  # type: ignore[prop-decorator]
@@ -77,8 +55,7 @@ class Collection(BaseModel):
         Returns None if no jokes have ratings.
         """
         jokes_with_ratings = [
-            joke for joke in self.jokes
-            if joke.weighted_avg_funniness is not None
+            joke for joke in self.jokes if joke.weighted_avg_funniness is not None
         ]
 
         if not jokes_with_ratings:
@@ -135,9 +112,9 @@ class Collection(BaseModel):
                     "last_modified": "2024-01-15T10:30:00Z",
                     "metadata": {
                         "source_files": ["reddit_jokes.json", "manual_entries.json"],
-                        "contributors": ["user1", "user2"]
+                        "contributors": ["user1", "user2"],
                     },
-                    "jokes": []
+                    "jokes": [],
                 }
             ]
         }

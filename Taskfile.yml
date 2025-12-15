@@ -1,0 +1,76 @@
+version: '3'
+
+vars:
+  PROJECT_NAME: joke-emporium
+  PYTHON_VERSION: '3.13'
+  VENV_PATH: .venv
+  UV: uv
+  PYTHON: '{{.VENV_PATH}}/Scripts/python.exe'
+  PYMARKDOWNLNT: uv run pymarkdownlnt
+  RUFF: uv run ruff
+  PYTEST: uv run pytest
+  PYTEST_COVERAGE: '80'
+
+tasks:
+  help:
+    desc: Show available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  init:
+    desc: Initialize the development environment
+    cmds:
+      - '{{.UV}} sync'
+
+  upgrade:
+    desc: Upgrade all dependencies to their latest versions
+    cmds:
+      - '{{.UV}} lock --upgrade'
+
+  lint:
+    desc: Lint the codebase
+    cmds:
+      - '{{.RUFF}} check .'
+
+  test:
+    desc: Run the test suite
+    cmds:
+      - '{{.PYTEST}} tests/'
+
+  test:collect:
+    desc: Run the test collection only
+    cmds:
+      - '{{.PYTEST}} --collect-only tests/'
+
+  test:coverage:
+    desc: Run the test suite with coverage report
+    cmds:
+      - '{{.PYTEST}} tests/ --cov={{.PROJECT_NAME}} --cov-report=term-missing --cov-report=html --cov-report=xml --cov-branch --cov-fail-under={{.PYTEST_COVERAGE}}'
+
+  format:
+    desc: Format the codebase
+    cmds:
+      - '{{.RUFF}} format . --respect-gitignore'
+      - '{{.RUFF}} check . --fix --respect-gitignore'
+
+  clean:
+    desc: Clean up generated files and caches
+    cmds:
+      - rm -rf __pycache__
+      - rm -rf .pytest_cache
+      - rm -rf .ruff_cache
+      - rm -rf .mypy_cache
+      - rm -rf dist
+      - rm -rf build
+      - rm -rf *.egg-info
+
+  # ============================================================================
+  # Default Task
+  # ============================================================================
+
+  default:
+    desc: Show help (default task when running 'task' with no arguments)
+    cmds:
+      - task: help
+    silent: true

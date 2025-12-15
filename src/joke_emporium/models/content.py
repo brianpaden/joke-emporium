@@ -15,26 +15,15 @@ class JokeElement(BaseModel):
     """
 
     type: ElementType = Field(
-        ...,
-        description="Type of content element (setup, punchline, text, etc.)"
+        ..., description="Type of content element (setup, punchline, text, etc.)"
     )
-    text: str = Field(
-        ...,
-        min_length=1,
-        description="The actual text content of this element"
-    )
+    text: str = Field(..., min_length=1, description="The actual text content of this element")
 
     model_config = {
         "json_schema_extra": {
             "examples": [
-                {
-                    "type": "setup",
-                    "text": "Why did the scarecrow win an award?"
-                },
-                {
-                    "type": "punchline",
-                    "text": "Because he was outstanding in his field!"
-                }
+                {"type": "setup", "text": "Why did the scarecrow win an award?"},
+                {"type": "punchline", "text": "Because he was outstanding in his field!"},
             ]
         }
     }

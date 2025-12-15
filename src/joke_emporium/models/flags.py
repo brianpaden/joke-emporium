@@ -10,41 +10,18 @@ class ContentFlags(BaseModel):
     They complement the maturity rating system.
     """
 
-    profanity: bool = Field(
-        default=False,
-        description="Contains profanity or strong language"
-    )
-    dark_humor: bool = Field(
-        default=False,
-        description="Contains dark, morbid, or gallows humor"
-    )
-    offensive: bool = Field(
-        default=False,
-        description="May be offensive to some audiences"
-    )
-    political: bool = Field(
-        default=False,
-        description="Contains political content or satire"
-    )
-    sexual: bool = Field(
-        default=False,
-        description="Contains sexual content or innuendo"
-    )
-    violent: bool = Field(
-        default=False,
-        description="Contains violent or graphic content"
-    )
+    profanity: bool = Field(default=False, description="Contains profanity or strong language")
+    dark_humor: bool = Field(default=False, description="Contains dark, morbid, or gallows humor")
+    offensive: bool = Field(default=False, description="May be offensive to some audiences")
+    political: bool = Field(default=False, description="Contains political content or satire")
+    sexual: bool = Field(default=False, description="Contains sexual content or innuendo")
+    violent: bool = Field(default=False, description="Contains violent or graphic content")
     stereotypical: bool = Field(
-        default=False,
-        description="Uses stereotypes or potentially insensitive characterizations"
+        default=False, description="Uses stereotypes or potentially insensitive characterizations"
     )
-    religious: bool = Field(
-        default=False,
-        description="Contains religious content or themes"
-    )
+    religious: bool = Field(default=False, description="Contains religious content or themes")
     requires_context: bool = Field(
-        default=False,
-        description="Requires specific cultural or contextual knowledge"
+        default=False, description="Requires specific cultural or contextual knowledge"
     )
 
     model_config = {
@@ -59,7 +36,7 @@ class ContentFlags(BaseModel):
                     "violent": False,
                     "stereotypical": False,
                     "religious": False,
-                    "requires_context": False
+                    "requires_context": False,
                 },
                 {
                     "profanity": True,
@@ -70,8 +47,8 @@ class ContentFlags(BaseModel):
                     "violent": False,
                     "stereotypical": False,
                     "religious": False,
-                    "requires_context": False
-                }
+                    "requires_context": False,
+                },
             ]
         }
     }

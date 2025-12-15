@@ -16,33 +16,20 @@ class Author(BaseModel):
     - Unknown sources
     """
 
-    id: str = Field(
-        ...,
-        description="Unique identifier for this author (UUID, username, etc.)"
-    )
+    id: str = Field(..., description="Unique identifier for this author (UUID, username, etc.)")
     type: AuthorType = Field(
-        ...,
-        description="Type of author (individual, group, anonymous, unknown)"
+        ..., description="Type of author (individual, group, anonymous, unknown)"
     )
-    name: str | None = Field(
-        default=None,
-        description="Display name of the author"
-    )
+    name: str | None = Field(default=None, description="Display name of the author")
     real_name: str | None = Field(
-        default=None,
-        description="Real name (if known and different from display name)"
+        default=None, description="Real name (if known and different from display name)"
     )
-    bio: str | None = Field(
-        default=None,
-        description="Brief biography or description"
-    )
+    bio: str | None = Field(default=None, description="Brief biography or description")
     url: str | None = Field(
-        default=None,
-        description="Author's website, social media, or profile URL"
+        default=None, description="Author's website, social media, or profile URL"
     )
     metadata: dict | None = Field(
-        default=None,
-        description="Additional platform-specific or custom metadata"
+        default=None, description="Additional platform-specific or custom metadata"
     )
 
     model_config = {
@@ -55,7 +42,7 @@ class Author(BaseModel):
                     "real_name": None,
                     "bio": None,
                     "url": "https://reddit.com/u/funny_person_123",
-                    "metadata": {"platform": "reddit", "karma": 15234}
+                    "metadata": {"platform": "reddit", "karma": 15234},
                 },
                 {
                     "id": "mitch-hedberg",
@@ -64,7 +51,7 @@ class Author(BaseModel):
                     "real_name": "Mitchell Lee Hedberg",
                     "bio": "American stand-up comedian known for surreal humor and deadpan delivery",
                     "url": "https://en.wikipedia.org/wiki/Mitch_Hedberg",
-                    "metadata": {"born": "1968-02-24", "died": "2005-03-29"}
+                    "metadata": {"born": "1968-02-24", "died": "2005-03-29"},
                 },
                 {
                     "id": "anonymous",
@@ -73,8 +60,8 @@ class Author(BaseModel):
                     "real_name": None,
                     "bio": None,
                     "url": None,
-                    "metadata": None
-                }
+                    "metadata": None,
+                },
             ]
         }
     }

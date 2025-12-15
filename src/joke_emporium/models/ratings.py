@@ -11,32 +11,18 @@ class Vote(BaseModel):
     Tracks individual ratings with timestamps for detailed analysis.
     """
 
-    funniness: float = Field(
-        ...,
-        ge=1.0,
-        le=5.0,
-        description="Funniness rating (1.0-5.0 scale)"
-    )
+    funniness: float = Field(..., ge=1.0, le=5.0, description="Funniness rating (1.0-5.0 scale)")
     quality: float | None = Field(
         default=None,
         ge=1.0,
         le=5.0,
-        description="Quality/cleverness rating (1.0-5.0 scale, optional)"
+        description="Quality/cleverness rating (1.0-5.0 scale, optional)",
     )
-    timestamp: datetime = Field(
-        ...,
-        description="When this vote was cast"
-    )
+    timestamp: datetime = Field(..., description="When this vote was cast")
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "funniness": 4.5,
-                    "quality": 4.0,
-                    "timestamp": "2024-01-15T14:23:45Z"
-                }
-            ]
+            "examples": [{"funniness": 4.5, "quality": 4.0, "timestamp": "2024-01-15T14:23:45Z"}]
         }
     }
 
@@ -54,38 +40,23 @@ class RatingSource(BaseModel):
     """
 
     source: str = Field(
-        ...,
-        description="Source identifier (URL, platform name, dataset name, etc.)"
+        ..., description="Source identifier (URL, platform name, dataset name, etc.)"
     )
     min_rating: float = Field(
-        default=1.0,
-        description="Minimum possible rating in the original scale"
+        default=1.0, description="Minimum possible rating in the original scale"
     )
     max_rating: float = Field(
-        default=5.0,
-        description="Maximum possible rating in the original scale"
+        default=5.0, description="Maximum possible rating in the original scale"
     )
-    total_ratings: int = Field(
-        ...,
-        ge=0,
-        description="Total number of ratings from this source"
-    )
-    avg_funniness: float = Field(
-        ...,
-        description="Average funniness rating in the ORIGINAL scale"
-    )
+    total_ratings: int = Field(..., ge=0, description="Total number of ratings from this source")
+    avg_funniness: float = Field(..., description="Average funniness rating in the ORIGINAL scale")
     avg_quality: float | None = Field(
-        default=None,
-        description="Average quality rating in the ORIGINAL scale (optional)"
+        default=None, description="Average quality rating in the ORIGINAL scale (optional)"
     )
     votes: list[Vote] | None = Field(
-        default=None,
-        description="Optional list of individual votes (for detailed datasets)"
+        default=None, description="Optional list of individual votes (for detailed datasets)"
     )
-    metadata: dict | None = Field(
-        default=None,
-        description="Additional source-specific metadata"
-    )
+    metadata: dict | None = Field(default=None, description="Additional source-specific metadata")
 
     @field_validator("avg_funniness")
     @classmethod
@@ -167,7 +138,7 @@ class RatingSource(BaseModel):
                     "avg_funniness": 0.936,
                     "avg_quality": None,
                     "votes": None,
-                    "metadata": {"upvotes": 1250, "downvotes": 85}
+                    "metadata": {"upvotes": 1250, "downvotes": 85},
                 },
                 {
                     "source": "manual_annotation",
@@ -177,24 +148,12 @@ class RatingSource(BaseModel):
                     "avg_funniness": 4.67,
                     "avg_quality": 4.33,
                     "votes": [
-                        {
-                            "funniness": 5.0,
-                            "quality": 4.0,
-                            "timestamp": "2024-01-15T14:23:45Z"
-                        },
-                        {
-                            "funniness": 4.0,
-                            "quality": 5.0,
-                            "timestamp": "2024-01-15T15:10:22Z"
-                        },
-                        {
-                            "funniness": 5.0,
-                            "quality": 4.0,
-                            "timestamp": "2024-01-15T16:05:33Z"
-                        }
+                        {"funniness": 5.0, "quality": 4.0, "timestamp": "2024-01-15T14:23:45Z"},
+                        {"funniness": 4.0, "quality": 5.0, "timestamp": "2024-01-15T15:10:22Z"},
+                        {"funniness": 5.0, "quality": 4.0, "timestamp": "2024-01-15T16:05:33Z"},
                     ],
-                    "metadata": None
-                }
+                    "metadata": None,
+                },
             ]
         }
     }
