@@ -208,3 +208,6 @@ __marimo__/
 
 # Claude settings
 .claude/settings.local.json
+
+# VS Code settings
+.vscode/
