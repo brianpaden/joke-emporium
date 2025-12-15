@@ -1,0 +1,65 @@
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "version": 1,
+  "content": [
+    {
+      "type": "setup",
+      "text": "Why did the scarecrow win an award?"
+    },
+    {
+      "type": "punchline",
+      "text": "Because he was outstanding in his field!"
+    }
+  ],
+  "categories": ["work", "wordplay"],
+  "structure": "qa",
+  "mechanisms": ["pun_homographic"],
+  "maturity_rating": "g",
+  "cognitive_type": "interpretational_sds",
+  "tags": ["classic", "pun", "wholesome"],
+  "flags": {
+    "profanity": false,
+    "dark_humor": false,
+    "offensive": false,
+    "political": false,
+    "sexual": false,
+    "violent": false,
+    "stereotypical": false,
+    "religious": false,
+    "requires_context": false
+  },
+  "ratings": [
+    {
+      "source": "manual_annotation",
+      "min_rating": 1.0,
+      "max_rating": 5.0,
+      "total_ratings": 3,
+      "avg_funniness": 4.67,
+      "avg_quality": 4.33,
+      "votes": null,
+      "metadata": null
+    }
+  ],
+  "metadata": {
+    "language": "en",
+    "authors": [
+      {
+        "id": "anonymous",
+        "type": "anonymous",
+        "name": "Anonymous",
+        "real_name": null,
+        "bio": null,
+        "url": null,
+        "metadata": null
+      }
+    ],
+    "source": null,
+    "engagement": null,
+    "created_date": null,
+    "added_date": "2024-01-15T10:30:00Z",
+    "last_modified": "2024-01-15T10:30:00Z",
+    "verified": true,
+    "metadata": null
+  },
+  "gtvh": null
+}
