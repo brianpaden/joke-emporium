@@ -6,9 +6,9 @@ These are optional advanced annotations based on academic humor research.
 from pydantic import BaseModel, Field
 
 from joke_emporium.models.enums import (
-    OppositionType,
     LogicalMechanism,
     NarrativeStrategy,
+    OppositionType,
     TargetType,
 )
 

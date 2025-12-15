@@ -3,17 +3,17 @@
 from pydantic import BaseModel, Field, computed_field
 
 from joke_emporium.models.content import JokeElement
-from joke_emporium.models.ratings import RatingSource
-from joke_emporium.models.metadata import JokeMetadata
-from joke_emporium.models.flags import ContentFlags
-from joke_emporium.models.gtvh import GTVHAnnotation
 from joke_emporium.models.enums import (
     Category,
-    StructureType,
+    CognitiveType,
     LinguisticMechanism,
     MaturityRating,
-    CognitiveType,
+    StructureType,
 )
+from joke_emporium.models.flags import ContentFlags
+from joke_emporium.models.gtvh import GTVHAnnotation
+from joke_emporium.models.metadata import JokeMetadata
+from joke_emporium.models.ratings import RatingSource
 
 
 class Joke(BaseModel):

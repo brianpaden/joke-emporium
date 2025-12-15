@@ -4,8 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, computed_field
 
-from joke_emporium.models.joke import Joke
 from joke_emporium.models.enums import MaturityRating
+from joke_emporium.models.joke import Joke
 
 
 class Collection(BaseModel):

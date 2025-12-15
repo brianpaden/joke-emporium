@@ -4,8 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from joke_emporium.models.enums import SourcePlatform
 from joke_emporium.models.author import Author
+from joke_emporium.models.enums import SourcePlatform
 
 
 class Source(BaseModel):
