@@ -1,0 +1,70 @@
+# Basic .gitattributes for a python repo.
+
+# These files are text and should be normalized (Convert crlf => lf)
+*.gitattributes text eol=lf
+.gitignore      text eol=lf
+
+#
+# Exclude files from exporting
+#
+
+.gitattributes  export-ignore
+.gitignore      export-ignore
+
+#
+# Enable syntax highlighting for files with `.gitattributes` extensions.
+#
+*.gitattributes linguist-language=gitattributes
+*.gitattributes linguist-detectable=true
+*.gitattributes linguist-documentation=false
+
+# Python Files
+# ============
+*.pxd    text diff=python eol=lf
+*.py     text diff=python eol=lf
+*.py3    text diff=python eol=lf
+*.pyw    text diff=python eol=lf
+*.pyx    text diff=python eol=lf
+*.pyz    text diff=python eol=lf
+*.pyi    text diff=python eol=lf
+
+# Python Binary files
+# ============
+*.db     binary
+*.p      binary
+*.pkl    binary
+*.pickle binary
+*.pyc    binary export-ignore
+*.pyo    binary export-ignore
+*.pyd    binary
+
+# Jupyter notebook
+*.ipynb  text eol=lf
+
+# Powershell files
+# ============
+*.ps1      text eol=crlf
+*.ps1x     text eol=crlf
+*.psm1     text eol=crlf
+*.psd1     text eol=crlf
+*.ps1xml   text eol=crlf
+*.pssc     text eol=crlf
+*.psrc     text eol=crlf
+*.cdxml    text eol=crlf
+
+# Data files
+# ============
+*.csv     text eol=lf
+*.tsv     text eol=lf
+*.json    text eol=lf
+*.yaml    text eol=lf
+*.yml     text eol=lf
+
+# Markdown files
+# ============
+*.md      text diff=markdown eol=lf
+*.markdown text diff=markdown eol=lf
+README*  text diff=markdown eol=lf
+CHANGELOG* text diff=markdown eol=lf
+CONTRIBUTING* text diff=markdown eol=lf
+LICENSE* text diff=markdown eol=lf
