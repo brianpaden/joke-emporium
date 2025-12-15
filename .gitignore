@@ -211,3 +211,6 @@ __marimo__/
 
 # VS Code settings
 .vscode/
+
+# Temp data
+data/staging.db
