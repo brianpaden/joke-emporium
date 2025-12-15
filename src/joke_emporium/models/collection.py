@@ -54,9 +54,7 @@ class Collection(BaseModel):
 
         Returns None if no jokes have ratings.
         """
-        jokes_with_ratings = [
-            joke for joke in self.jokes if joke.weighted_avg_funniness is not None
-        ]
+        jokes_with_ratings = [joke for joke in self.jokes if joke.weighted_avg_funniness is not None]
 
         if not jokes_with_ratings:
             return None

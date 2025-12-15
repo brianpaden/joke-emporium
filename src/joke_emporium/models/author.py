@@ -17,20 +17,12 @@ class Author(BaseModel):
     """
 
     id: str = Field(..., description="Unique identifier for this author (UUID, username, etc.)")
-    type: AuthorType = Field(
-        ..., description="Type of author (individual, group, anonymous, unknown)"
-    )
+    type: AuthorType = Field(..., description="Type of author (individual, group, anonymous, unknown)")
     name: str | None = Field(default=None, description="Display name of the author")
-    real_name: str | None = Field(
-        default=None, description="Real name (if known and different from display name)"
-    )
+    real_name: str | None = Field(default=None, description="Real name (if known and different from display name)")
     bio: str | None = Field(default=None, description="Brief biography or description")
-    url: str | None = Field(
-        default=None, description="Author's website, social media, or profile URL"
-    )
-    metadata: dict | None = Field(
-        default=None, description="Additional platform-specific or custom metadata"
-    )
+    url: str | None = Field(default=None, description="Author's website, social media, or profile URL")
+    metadata: dict | None = Field(default=None, description="Additional platform-specific or custom metadata")
 
     model_config = {
         "json_schema_extra": {

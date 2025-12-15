@@ -65,9 +65,7 @@ class GTVHAnnotation(BaseModel):
     logical_mechanism: LogicalMechanism | None = Field(
         default=None, description="How the opposition is resolved logically"
     )
-    narrative_strategy: NarrativeStrategy | None = Field(
-        default=None, description="Narrative structure used"
-    )
+    narrative_strategy: NarrativeStrategy | None = Field(default=None, description="Narrative structure used")
     target: Target | None = Field(default=None, description="Who/what the joke targets")
     situation: str | None = Field(default=None, description="The situational context of the joke")
     notes: str | None = Field(default=None, description="Additional analytical notes")

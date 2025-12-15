@@ -14,9 +14,7 @@ class JokeElement(BaseModel):
         - Text: "I told my wife she was drawing her eyebrows too high. She looked surprised."
     """
 
-    type: ElementType = Field(
-        ..., description="Type of content element (setup, punchline, text, etc.)"
-    )
+    type: ElementType = Field(..., description="Type of content element (setup, punchline, text, etc.)")
     text: str = Field(..., min_length=1, description="The actual text content of this element")
 
     model_config = {

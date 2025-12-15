@@ -21,9 +21,7 @@ class Vote(BaseModel):
     timestamp: datetime = Field(..., description="When this vote was cast")
 
     model_config = {
-        "json_schema_extra": {
-            "examples": [{"funniness": 4.5, "quality": 4.0, "timestamp": "2024-01-15T14:23:45Z"}]
-        }
+        "json_schema_extra": {"examples": [{"funniness": 4.5, "quality": 4.0, "timestamp": "2024-01-15T14:23:45Z"}]}
     }
 
 
@@ -39,15 +37,9 @@ class RatingSource(BaseModel):
     - Percentage: min=0, max=100
     """
 
-    source: str = Field(
-        ..., description="Source identifier (URL, platform name, dataset name, etc.)"
-    )
-    min_rating: float = Field(
-        default=1.0, description="Minimum possible rating in the original scale"
-    )
-    max_rating: float = Field(
-        default=5.0, description="Maximum possible rating in the original scale"
-    )
+    source: str = Field(..., description="Source identifier (URL, platform name, dataset name, etc.)")
+    min_rating: float = Field(default=1.0, description="Minimum possible rating in the original scale")
+    max_rating: float = Field(default=5.0, description="Maximum possible rating in the original scale")
     total_ratings: int = Field(..., ge=0, description="Total number of ratings from this source")
     avg_funniness: float = Field(..., description="Average funniness rating in the ORIGINAL scale")
     avg_quality: float | None = Field(
@@ -67,8 +59,7 @@ class RatingSource(BaseModel):
 
         if not (min_rating <= v <= max_rating):
             raise ValueError(
-                f"avg_funniness ({v}) must be between min_rating ({min_rating}) "
-                f"and max_rating ({max_rating})"
+                f"avg_funniness ({v}) must be between min_rating ({min_rating}) and max_rating ({max_rating})"
             )
         return v
 
@@ -84,8 +75,7 @@ class RatingSource(BaseModel):
 
         if not (min_rating <= v <= max_rating):
             raise ValueError(
-                f"avg_quality ({v}) must be between min_rating ({min_rating}) "
-                f"and max_rating ({max_rating})"
+                f"avg_quality ({v}) must be between min_rating ({min_rating}) and max_rating ({max_rating})"
             )
         return v
 
@@ -105,9 +95,7 @@ class RatingSource(BaseModel):
             # Edge case: invalid scale, return middle value
             return 3.0
 
-        return 1.0 + (self.avg_funniness - self.min_rating) * 4.0 / (
-            self.max_rating - self.min_rating
-        )
+        return 1.0 + (self.avg_funniness - self.min_rating) * 4.0 / (self.max_rating - self.min_rating)
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -123,9 +111,7 @@ class RatingSource(BaseModel):
             # Edge case: invalid scale, return middle value
             return 3.0
 
-        return 1.0 + (self.avg_quality - self.min_rating) * 4.0 / (
-            self.max_rating - self.min_rating
-        )
+        return 1.0 + (self.avg_quality - self.min_rating) * 4.0 / (self.max_rating - self.min_rating)
 
     model_config = {
         "json_schema_extra": {

@@ -20,9 +20,7 @@ class ContentFlags(BaseModel):
         default=False, description="Uses stereotypes or potentially insensitive characterizations"
     )
     religious: bool = Field(default=False, description="Contains religious content or themes")
-    requires_context: bool = Field(
-        default=False, description="Requires specific cultural or contextual knowledge"
-    )
+    requires_context: bool = Field(default=False, description="Requires specific cultural or contextual knowledge")
 
     model_config = {
         "json_schema_extra": {

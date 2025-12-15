@@ -27,45 +27,31 @@ class Joke(BaseModel):
     version: int = Field(default=1, ge=1, description="Schema version for this joke")
 
     # Content
-    content: list[JokeElement] = Field(
-        ..., min_length=1, description="List of joke elements (setup, punchline, etc.)"
-    )
+    content: list[JokeElement] = Field(..., min_length=1, description="List of joke elements (setup, punchline, etc.)")
 
     # Categorization
-    categories: list[Category] = Field(
-        default_factory=list, description="Primary topic categories (can be multiple)"
-    )
-    structure: StructureType | None = Field(
-        default=None, description="Narrative structure of the joke"
-    )
+    categories: list[Category] = Field(default_factory=list, description="Primary topic categories (can be multiple)")
+    structure: StructureType | None = Field(default=None, description="Narrative structure of the joke")
     mechanisms: list[LinguisticMechanism] = Field(
         default_factory=list, description="Linguistic mechanisms used (puns, wordplay, etc.)"
     )
     maturity_rating: MaturityRating = Field(
         default=MaturityRating.G, description="Content maturity rating (G, PG, PG13, R, X)"
     )
-    cognitive_type: CognitiveType | None = Field(
-        default=None, description="Cognitive joke type (Chalmers taxonomy)"
-    )
+    cognitive_type: CognitiveType | None = Field(default=None, description="Cognitive joke type (Chalmers taxonomy)")
 
     # Tags & Flags
-    tags: list[str] = Field(
-        default_factory=list, description="Free-form tags for additional categorization"
-    )
+    tags: list[str] = Field(default_factory=list, description="Free-form tags for additional categorization")
     flags: ContentFlags = Field(default_factory=ContentFlags, description="Content warning flags")
 
     # Ratings
-    ratings: list[RatingSource] = Field(
-        default_factory=list, description="Ratings from various sources"
-    )
+    ratings: list[RatingSource] = Field(default_factory=list, description="Ratings from various sources")
 
     # Metadata
     metadata: JokeMetadata = Field(..., description="Source, authorship, and temporal metadata")
 
     # Advanced annotations (optional)
-    gtvh: GTVHAnnotation | None = Field(
-        default=None, description="Optional GTVH framework annotation"
-    )
+    gtvh: GTVHAnnotation | None = Field(default=None, description="Optional GTVH framework annotation")
 
     # Computed properties
     @computed_field  # type: ignore[prop-decorator]

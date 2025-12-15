@@ -13,12 +13,8 @@ class Source(BaseModel):
 
     platform: SourcePlatform = Field(..., description="Platform where the joke was found")
     url: str | None = Field(default=None, description="Direct URL to the original joke")
-    scraped_date: datetime | None = Field(
-        default=None, description="When the joke was scraped/collected"
-    )
-    metadata: dict | None = Field(
-        default=None, description="Platform-specific metadata (post ID, subreddit, etc.)"
-    )
+    scraped_date: datetime | None = Field(default=None, description="When the joke was scraped/collected")
+    metadata: dict | None = Field(default=None, description="Platform-specific metadata (post ID, subreddit, etc.)")
 
     model_config = {
         "json_schema_extra": {
@@ -46,9 +42,7 @@ class Engagement(BaseModel):
     downvotes: int | None = Field(default=None, ge=0, description="Number of downvotes/dislikes")
     comments: int | None = Field(default=None, ge=0, description="Number of comments")
     shares: int | None = Field(default=None, ge=0, description="Number of shares/retweets")
-    awards: int | None = Field(
-        default=None, ge=0, description="Number of awards (Reddit gold, etc.)"
-    )
+    awards: int | None = Field(default=None, ge=0, description="Number of awards (Reddit gold, etc.)")
 
     model_config = {
         "json_schema_extra": {
@@ -75,21 +69,13 @@ class JokeMetadata(BaseModel):
         max_length=5,
         description="ISO 639-1 language code (e.g., 'en', 'es', 'fr')",
     )
-    authors: list[Author] | None = Field(
-        default=None, description="List of authors/contributors (if known)"
-    )
+    authors: list[Author] | None = Field(default=None, description="List of authors/contributors (if known)")
     source: Source | None = Field(default=None, description="Information about the joke's origin")
-    engagement: Engagement | None = Field(
-        default=None, description="Engagement metrics from the source platform"
-    )
-    created_date: datetime | None = Field(
-        default=None, description="When the joke was originally created/posted"
-    )
+    engagement: Engagement | None = Field(default=None, description="Engagement metrics from the source platform")
+    created_date: datetime | None = Field(default=None, description="When the joke was originally created/posted")
     added_date: datetime = Field(..., description="When the joke was added to this dataset")
     last_modified: datetime = Field(..., description="When the joke metadata was last updated")
-    verified: bool = Field(
-        default=False, description="Whether the joke has been manually verified/reviewed"
-    )
+    verified: bool = Field(default=False, description="Whether the joke has been manually verified/reviewed")
     metadata: dict | None = Field(default=None, description="Additional custom metadata")
 
     model_config = {
