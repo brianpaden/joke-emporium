@@ -72,7 +72,13 @@ def import_cmd(
 
         # Import based on source
         if source == "taivop":
-            from joke_emporium.importers.taivop import TaivopImporter
+            try:
+                from joke_emporium.importers.taivop import TaivopImporter
+            except ImportError:
+                click.echo("Error: TaivopImporter not implemented yet.", err=True)
+                click.echo("This importer will be available in Sprint 2.", err=True)
+                click.echo("\nTo implement it, create: src/joke_emporium/importers/taivop.py", err=True)
+                sys.exit(1)
 
             importer = TaivopImporter()
 

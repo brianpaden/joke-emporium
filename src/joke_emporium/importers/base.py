@@ -165,6 +165,12 @@ class BaseImporter(ABC):
             validation_status=ValidationStatus.PENDING,
         )
 
+        # Create import batch record
+        from joke_emporium.db.staging import create_import_batch
+
+        import_batch = create_import_batch(session, metadata)
+        import_batch_id = import_batch.id
+
         try:
             # Step 1: Download
             logger.info("Downloading source data...")
@@ -210,7 +216,7 @@ class BaseImporter(ABC):
 
                     # Save batch
                     if len(batch) >= batch_size:
-                        self._save_batch(session, batch, import_id)
+                        self._save_batch(session, batch, import_batch_id)
                         metadata.successful += len(batch)
                         batch = []
                         logger.info(
@@ -226,8 +232,15 @@ class BaseImporter(ABC):
 
             # Save remaining batch
             if batch:
-                self._save_batch(session, batch, import_id)
+                self._save_batch(session, batch, import_batch_id)
                 metadata.successful += len(batch)
+
+            # Update import batch with final statistics
+            import_batch.total_records = metadata.total_records
+            import_batch.successful = metadata.successful
+            import_batch.failed = metadata.failed
+            session.add(import_batch)
+            session.commit()
 
             logger.info(
                 f"Import complete: {metadata.successful} successful, "
@@ -245,22 +258,21 @@ class BaseImporter(ABC):
         self,
         session: Session,
         batch: list[tuple[Joke, dict[str, Any]]],
-        import_id: str,
+        import_batch_id: int,
     ) -> None:
         """Save a batch of jokes to staging database.
 
         Args:
             session: Database session
             batch: List of (joke, raw_data) tuples
-            import_id: Import batch ID
-
-        Note:
-            This will be implemented once staging database models are ready.
-            For now, it's a placeholder that logs the batch.
+            import_batch_id: Import batch database ID
         """
-        # TODO: Implement actual staging database save
-        logger.debug(f"Saving batch of {len(batch)} jokes to staging (import_id={import_id})")
-        # This will be implemented with staging database operations
+        from joke_emporium.db.staging import save_staging_joke
+
+        logger.debug(f"Saving batch of {len(batch)} jokes to staging (import_batch_id={import_batch_id})")
+
+        for joke, raw_data in batch:
+            save_staging_joke(session, joke, raw_data, import_batch_id)
 
     def cleanup(self) -> None:
         """Clean up temporary files after import.
