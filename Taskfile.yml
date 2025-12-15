@@ -72,6 +72,45 @@ tasks:
       - rm -rf *.egg-info
 
   # ============================================================================
+  # Import Tasks
+  # ============================================================================
+
+  import:taivop:
+    desc: Import jokes from taivop/joke-dataset
+    cmds:
+      - uv run python -m joke_emporium.importers.cli import taivop {{.CLI_ARGS}}
+
+  import:list:
+    desc: List all import batches
+    cmds:
+      - uv run python -m joke_emporium.importers.cli list {{.CLI_ARGS}}
+
+  import:inspect:
+    desc: Inspect staging jokes for an import batch
+    cmds:
+      - uv run python -m joke_emporium.importers.cli inspect {{.CLI_ARGS}}
+
+  import:approve:
+    desc: Approve a staging joke for production
+    cmds:
+      - uv run python -m joke_emporium.importers.cli approve {{.CLI_ARGS}}
+
+  import:reject:
+    desc: Reject a staging joke
+    cmds:
+      - uv run python -m joke_emporium.importers.cli reject {{.CLI_ARGS}}
+
+  import:merge:
+    desc: Merge approved staging jokes to production
+    cmds:
+      - uv run python -m joke_emporium.importers.cli merge {{.CLI_ARGS}}
+
+  import:delete:
+    desc: Delete an import batch and all its staging jokes
+    cmds:
+      - uv run python -m joke_emporium.importers.cli delete {{.CLI_ARGS}}
+
+  # ============================================================================
   # Default Task
   # ============================================================================
 

@@ -8,6 +8,7 @@ from joke_emporium.db.models.associations import (
 from joke_emporium.db.models.author import AuthorDB
 from joke_emporium.db.models.joke import JokeDB
 from joke_emporium.db.models.rating import RatingSourceDB, VoteDB
+from joke_emporium.db.models.staging import ImportBatchDB, StagingJokeDB
 
 __all__ = [
     # Association tables
@@ -19,4 +20,7 @@ __all__ = [
     "JokeDB",
     "RatingSourceDB",
     "VoteDB",
+    # Staging models
+    "ImportBatchDB",
+    "StagingJokeDB",
 ]
