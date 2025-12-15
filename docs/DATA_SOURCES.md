@@ -77,14 +77,30 @@
 
 ## Potential APIs to Explore
 
-- icanhazdadjoke.com API
-- Official Joke API
-- JokeAPI.dev
-- Chuck Norris API (for specific category)
-- HumorAPI - filtering by type, blacklist flags, and ratings
-- API Ninjas Jokes - lightweight REST API with topic filters
-- Jokes One API - categorized jokes and joke-of-the-day endpoints
-- DadSoFunny API - dad-joke corpus with general/programming/knock-knock filters
+- **icanhazdadjoke.com API**
+  - Auth: No API key; requires a descriptive `User-Agent` header per usage policy.
+  - License: Creative Commons BY-NC 4.0, so attribution is required and commercial use needs explicit permission.
+- **Official Joke API**
+  - Auth: None required; open REST endpoint.
+  - License: MIT (per GitHub project), permitting reuse with attribution.
+- **JokeAPI.dev**
+  - Auth: None for standard usage; rate limited (~120 requests/min). Premium keys available for higher quotas.
+  - License: Aggregated jokes under CC BY-SA 3.0/Public Domain depending on source; verify per category before redistribution.
+- **Chuck Norris API** (for specific category)
+  - Auth: None required.
+  - License: Provided by api.chucknorris.io; jokes are sourced from ICNDb (public domain/CC-BY), but attribution to Chuck Norris API is requested.
+- **HumorAPI** - filtering by type, blacklist flags, and ratings
+  - Auth: Required; obtain an API key. Free tier allows ~10 calls/day, paid plans increase quota.
+  - License: Commercial use permitted with paid plan; follow HumorAPI ToS and respect user-content restrictions.
+- **API Ninjas Jokes** - lightweight REST API with topic filters
+  - Auth: Required; free API key with daily quota (~50 requests/day).
+  - License: Terms limit resale/redistribution; primarily for app integrations with attribution.
+- **Jokes One API** - categorized jokes and joke-of-the-day endpoints
+  - Auth: Required; register for a key (free tier with limited daily calls, paid for higher).
+  - License: Usage allowed with attribution to jokes.one; redistribution in bulk requires approval.
+- **DadSoFunny API** - dad-joke corpus with general/programming/knock-knock filters
+  - Auth: None; public Cloud Functions endpoint.
+  - License: Derived from r/dadjokes submissions (Reddit content policy, CC BY-SA); include attribution to original authors/subreddit.
 
 ## Scraping Targets (with permission/robots.txt compliance)
 
