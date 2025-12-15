@@ -23,6 +23,12 @@ tasks:
     cmds:
       - '{{.UV}} sync'
 
+  install:
+    desc: Install project dependencies
+    cmds:
+      - git lfs install
+      - task: init
+
   upgrade:
     desc: Upgrade all dependencies to their latest versions
     cmds:
