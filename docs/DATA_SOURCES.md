@@ -81,6 +81,10 @@
 - Official Joke API
 - JokeAPI.dev
 - Chuck Norris API (for specific category)
+- HumorAPI - filtering by type, blacklist flags, and ratings
+- API Ninjas Jokes - lightweight REST API with topic filters
+- Jokes One API - categorized jokes and joke-of-the-day endpoints
+- DadSoFunny API - dad-joke corpus with general/programming/knock-knock filters
 
 ## Scraping Targets (with permission/robots.txt compliance)
 
