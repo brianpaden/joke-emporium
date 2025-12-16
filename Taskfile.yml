@@ -116,6 +116,11 @@ tasks:
     cmds:
       - uv run python -m joke_emporium.importers.cli delete {{.CLI_ARGS}}
 
+  import:reset:
+    desc: Reset/clear the staging database (WARNING - deletes all data)
+    cmds:
+      - uv run python -m joke_emporium.importers.cli reset {{.CLI_ARGS}}
+
   # ============================================================================
   # Default Task
   # ============================================================================

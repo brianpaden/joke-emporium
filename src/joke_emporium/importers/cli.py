@@ -338,6 +338,52 @@ def delete(import_id: str, yes: bool, staging_db: str | None) -> None:
         sys.exit(1)
 
 
+@cli.command("reset")
+@click.option("--yes", is_flag=True, help="Skip confirmation")
+@click.option(
+    "--staging-db",
+    type=click.Path(),
+    default=None,
+    help="Path to staging database",
+)
+def reset(yes: bool, staging_db: str | None) -> None:
+    """Reset/clear the staging database.
+
+    WARNING: This will delete ALL import batches and staging jokes!
+
+    Example:
+        python -m joke_emporium.importers.cli reset --yes
+    """
+    try:
+        db_path = Path(staging_db) if staging_db else Path("data/staging.db")
+
+        if not db_path.exists():
+            click.echo(f"Staging database does not exist: {db_path}")
+            return
+
+        if not yes:
+            click.echo(f"WARNING: This will delete the staging database at: {db_path}")
+            click.echo("All import batches and staging jokes will be permanently removed.")
+            confirm = click.confirm("Are you sure you want to continue?")
+            if not confirm:
+                click.echo("Cancelled.")
+                return
+
+        # Delete the database file
+        db_path.unlink()
+        click.echo(f"Deleted staging database: {db_path}")
+
+        # Reinitialize with empty database
+        db_url = f"sqlite:///{db_path}"
+        init_staging_db(db_url)
+        click.echo(f"Reinitialized empty staging database")
+        click.echo("\nStaging database has been reset successfully.")
+
+    except Exception as e:
+        click.echo(f"Error resetting database: {e}", err=True)
+        sys.exit(1)
+
+
 @cli.command("merge")
 @click.argument("import_id")
 @click.option("--auto-approve", is_flag=True, help="Auto-approve all pending jokes")

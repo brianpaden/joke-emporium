@@ -30,23 +30,38 @@ class TaivopImporter(BaseImporter):
     """Import jokes from taivop/joke-dataset repository.
 
     Source: https://github.com/taivop/joke-dataset
-    Contains ~200k jokes from Reddit, stupidstuff.org, and wocka.com
+    Contains ~208k jokes from Reddit, stupidstuff.org, and wocka.com
 
-    Data format:
-    - reddit_jokes.json: Jokes from Reddit r/jokes
-    - stupidstuff.json: Jokes from stupidstuff.org
-    - wocka.json: Jokes from wocka.com
+    Data formats vary by source:
 
-    Each joke has format:
-    {
-        "id": "1",
-        "type": "single" or "twoPart",
-        "setup": "Why did the chicken...",  # For twoPart
-        "punchline": "...",                  # For twoPart
-        "body": "One liner joke",            # For single
-        "score": 123,                        # Optional rating
-        "category": "one-liners"             # Optional category
-    }
+    1. reddit_jokes.json (194k jokes):
+       {
+           "id": "5tz52q",
+           "title": "Setup text here",      # Question/setup
+           "body": "Punchline text here",   # Answer/punchline (can be empty)
+           "score": 123                      # Optional upvote score
+       }
+
+    2. stupidstuff.json (3.8k jokes):
+       {
+           "id": 1,
+           "body": "Full joke text as narrative/story",
+           "category": "Children",
+           "rating": 2.63                    # Quality rating
+       }
+
+    3. wocka.json (10k jokes):
+       {
+           "id": 1,
+           "title": "Joke Name",             # Descriptive title (not the setup!)
+           "body": "Setup text\\r\\n\\r\\nPunchline",  # Full joke with separator
+           "category": "Animal"
+       }
+
+    Transform logic:
+    - Reddit: title → setup, body → punchline (or title → one-liner if body empty)
+    - Stupidstuff: body → one-liner
+    - Wocka: body split on \\r\\n\\r\\n → setup/punchline (or one-liner if no separator)
     """
 
     source_name = "taivop/joke-dataset"
@@ -260,7 +275,46 @@ class TaivopImporter(BaseImporter):
 
             else:
                 # Unknown type, try to infer
-                if "setup" in raw_data and ("punchline" in raw_data or "delivery" in raw_data):
+                # Check for wocka format (title is just a name, body contains full joke)
+                source_file = raw_data.get("_source_file", "")
+                if source_file == "wocka" and "body" in raw_data:
+                    body = raw_data.get("body", "").strip()
+
+                    # Wocka jokes have setup and punchline separated by double newlines
+                    # Try to split on various newline patterns
+                    if "\r\n\r\n" in body:
+                        parts = body.split("\r\n\r\n", 1)
+                    elif "\n\n" in body:
+                        parts = body.split("\n\n", 1)
+                    else:
+                        # No clear separator, treat as one-liner
+                        parts = [body]
+
+                    if len(parts) == 2:
+                        setup, punchline = parts
+                        content.append(JokeElement(type=ElementType.SETUP, text=setup.strip()))
+                        content.append(JokeElement(type=ElementType.PUNCHLINE, text=punchline.strip()))
+                        structure = StructureType.QA
+                    elif body:
+                        content.append(JokeElement(type=ElementType.TEXT, text=body))
+                        structure = StructureType.ONE_LINER
+
+                # Check for Reddit format (title + body)
+                elif "title" in raw_data:
+                    title = raw_data.get("title", "").strip()
+                    body = raw_data.get("body", "").strip()
+
+                    if title and body:
+                        # Both title and body present - treat as Q&A
+                        content.append(JokeElement(type=ElementType.SETUP, text=title))
+                        content.append(JokeElement(type=ElementType.PUNCHLINE, text=body))
+                        structure = StructureType.QA
+                    elif title:
+                        # Only title present - treat as one-liner
+                        content.append(JokeElement(type=ElementType.TEXT, text=title))
+                        structure = StructureType.ONE_LINER
+                # Check for explicit setup/punchline format
+                elif "setup" in raw_data and ("punchline" in raw_data or "delivery" in raw_data):
                     setup = raw_data.get("setup", "").strip()
                     punchline = raw_data.get("delivery") or raw_data.get("punchline", "")
                     punchline = punchline.strip()
@@ -269,6 +323,7 @@ class TaivopImporter(BaseImporter):
                         content.append(JokeElement(type=ElementType.SETUP, text=setup))
                         content.append(JokeElement(type=ElementType.PUNCHLINE, text=punchline))
                         structure = StructureType.QA
+                # Fallback to joke/body as one-liner
                 elif "joke" in raw_data or "body" in raw_data:
                     body = raw_data.get("joke") or raw_data.get("body", "")
                     body = body.strip()
@@ -398,11 +453,11 @@ class TaivopImporter(BaseImporter):
         # Call base validation
         is_valid, errors = super().validate(joke)
 
-        # Minimum text length
+        # Minimum text length (20 chars covers even very short jokes)
         total_length = sum(len(elem.text) for elem in joke.content)
-        if total_length < 5:
+        if total_length < 20:
             is_valid = False
-            errors.append(f"Joke too short: {total_length} chars (minimum 5)")
+            errors.append(f"Joke too short: {total_length} chars (minimum 20)")
 
         # Check for placeholder/test jokes
         combined_text = " ".join(elem.text.lower() for elem in joke.content)
