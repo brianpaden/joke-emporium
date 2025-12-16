@@ -1,0 +1,97 @@
+[
+  {
+    "id": "1",
+    "type": "single",
+    "joke": "I told my wife she was drawing her eyebrows too high. She looked surprised.",
+    "score": 1500,
+    "category": "one-liners",
+    "safe": true,
+    "lang": "en"
+  },
+  {
+    "id": "2",
+    "type": "twoPart",
+    "setup": "Why did the programmer quit?",
+    "delivery": "Because they didn't get arrays!",
+    "score": 850,
+    "category": "programmer",
+    "safe": true,
+    "lang": "en"
+  },
+  {
+    "id": "3",
+    "type": "single",
+    "joke": "Parallel lines have so much in common. It's a shame they'll never meet.",
+    "score": 2100,
+    "category": "puns",
+    "safe": true,
+    "lang": "en"
+  },
+  {
+    "id": "4",
+    "type": "twoPart",
+    "setup": "What do you call a fake noodle?",
+    "delivery": "An impasta!",
+    "score": 950,
+    "category": "food",
+    "safe": true,
+    "lang": "en"
+  },
+  {
+    "id": "5",
+    "type": "single",
+    "joke": "I'm reading a book about anti-gravity. It's impossible to put down!",
+    "score": 1750,
+    "category": "wordplay",
+    "safe": true,
+    "lang": "en"
+  },
+  {
+    "id": "6",
+    "type": "twoPart",
+    "setup": "Why don't scientists trust atoms?",
+    "delivery": "Because they make up everything!",
+    "score": 1200,
+    "category": "science",
+    "safe": true,
+    "lang": "en"
+  },
+  {
+    "id": "7",
+    "type": "single",
+    "joke": "Time flies like an arrow. Fruit flies like a banana.",
+    "score": 890,
+    "category": "wordplay",
+    "safe": true,
+    "lang": "en"
+  },
+  {
+    "id": "8",
+    "type": "twoPart",
+    "setup": "What did the ocean say to the beach?",
+    "delivery": "Nothing, it just waved.",
+    "score": 1100,
+    "category": "one-liners",
+    "safe": true,
+    "lang": "en"
+  },
+  {
+    "id": "9",
+    "type": "single",
+    "joke": "I used to hate facial hair, but then it grew on me.",
+    "score": 780,
+    "category": "puns",
+    "safe": true,
+    "lang": "en"
+  },
+  {
+    "id": "10",
+    "type": "twoPart",
+    "setup": "Why did the scarecrow win an award?",
+    "delivery": "Because he was outstanding in his field!",
+    "score": 1450,
+    "category": "work",
+    "safe": true,
+    "lang": "en"
+  }
+]

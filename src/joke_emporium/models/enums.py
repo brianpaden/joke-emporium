@@ -47,9 +47,15 @@ class Category(str, Enum):
     ABSURD = "absurd"
     WORDPLAY = "wordplay"
 
-    # Demographics
+    # Demographics & Stereotypes
     KIDS = "kids"
     ELDERLY = "elderly"
+    BLONDE = "blonde"  # Blonde jokes (stereotype-based)
+    CHUCK_NORRIS = "chuck_norris"  # Chuck Norris jokes
+
+    # Humor Styles
+    DARK = "dark"  # Dark humor
+    OFFENSIVE = "offensive"  # Potentially offensive content
 
     # Miscellaneous
     MISCELLANEOUS = "miscellaneous"

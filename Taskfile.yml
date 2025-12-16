@@ -28,6 +28,7 @@ tasks:
     cmds:
       - git lfs install
       - task: init
+      - uv tool install claude-monitor
 
   upgrade:
     desc: Upgrade all dependencies to their latest versions
@@ -38,6 +39,11 @@ tasks:
     desc: Lint the codebase
     cmds:
       - '{{.RUFF}} check .'
+
+  monitor:claude:
+    desc: Start claude code monitoring
+    cmds:
+      - wt -d . claude-code-monitor.exe
 
   test:
     desc: Run the test suite
