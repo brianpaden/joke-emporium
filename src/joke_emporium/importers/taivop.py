@@ -127,6 +127,37 @@ class TaivopImporter(BaseImporter):
             logger.error(f"Download failed: {e}")
             raise ImportError(f"Download failed: {e}") from e
 
+    def count_total_jokes(self, data_path: Path) -> int:
+        """Count total number of jokes in all JSON files.
+
+        Args:
+            data_path: Path to directory containing JSON files
+
+        Returns:
+            Total number of valid jokes across all files
+        """
+        total = 0
+        for json_file in data_path.glob("*.json"):
+            try:
+                with open(json_file, encoding="utf-8") as f:
+                    jokes = json.load(f)
+
+                if isinstance(jokes, list):
+                    # Count only valid dict entries
+                    valid_jokes = sum(1 for joke in jokes if isinstance(joke, dict))
+                    total += valid_jokes
+                    logger.debug(f"Counted {valid_jokes} jokes in {json_file.name}")
+                else:
+                    logger.error(f"{json_file.name} does not contain a JSON array")
+
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse {json_file.name} during count: {e}")
+            except Exception as e:
+                logger.error(f"Error counting jokes in {json_file.name}: {e}")
+
+        logger.info(f"Total jokes to process: {total:,}")
+        return total
+
     def parse(self, data_path: Path) -> Iterator[dict[str, Any]]:
         """Parse JSON files and yield joke dictionaries.
 

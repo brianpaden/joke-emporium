@@ -177,6 +177,12 @@ class BaseImporter(ABC):
             data_path = self.download()
             logger.info(f"Downloaded to {data_path}")
 
+            # Step 1.5: Count total if method exists (for progress tracking)
+            if hasattr(self, 'count_total_jokes'):
+                logger.info("Counting total jokes...")
+                progress.total = self.count_total_jokes(data_path)
+                logger.info(f"Total jokes to process: {progress.total:,}")
+
             # Step 2: Parse and transform
             logger.info("Parsing and transforming data...")
 
