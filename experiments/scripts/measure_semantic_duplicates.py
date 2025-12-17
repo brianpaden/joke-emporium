@@ -20,9 +20,8 @@ from pathlib import Path
 
 # Check for sentence-transformers
 try:
-    from sentence_transformers import SentenceTransformer
     import numpy as np
-    from sklearn.metrics.pairwise import cosine_similarity
+    from sentence_transformers import SentenceTransformer
     from tqdm import tqdm
 
     EMBEDDINGS_AVAILABLE = True
@@ -227,7 +226,7 @@ def measure_semantic_duplicates(sample_size: int = 2000, similarity_threshold: f
     print(f"{'=' * 70}")
     print(f"\nSample size: {total_jokes:,} jokes")
     print(f"Similarity threshold: {similarity_threshold:.0%}")
-    print(f"\nDuplicate Detection:")
+    print("\nDuplicate Detection:")
     print(f"  Hash-based duplicate groups: {hash_duplicates}")
     print(f"  Semantic-only duplicate pairs: {semantic_only_count}")
     print(f"  Unique jokes in semantic dups: {unique_jokes_in_semantic_dups}")
@@ -265,7 +264,7 @@ def measure_semantic_duplicates(sample_size: int = 2000, similarity_threshold: f
     print(f"{'=' * 70}")
 
     if semantic_only_duplicates:
-        print(f"\nShowing first 10 semantic-only duplicate pairs:")
+        print("\nShowing first 10 semantic-only duplicate pairs:")
 
         for i, dup in enumerate(semantic_only_duplicates[:10], 1):
             print(f"\n{'-' * 70}")
