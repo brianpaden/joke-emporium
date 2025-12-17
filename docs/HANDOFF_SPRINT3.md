@@ -86,15 +86,37 @@ class StagingJokeDB(SQLModel, table=True):
 
 **Migration Required:** Add new columns to existing staging database
 
-### 2. Simple Deduplication Logic
+### 2. Data-Driven Deduplication Logic
+
+**Experimental Validation:** Based on analysis of 208k real jokes from taivop dataset (see `experiments/output/EXPERIMENT_RESULTS.md`)
+
+**Key Findings:**
+- 2,590 duplicate groups found (3.7% duplication rate)
+- 99.5% of duplicates are same-source (Reddit reposts)
+- Hash-based exact match achieves 100% recall on real duplicates
+- Aggressive normalization achieves 68.5% recall on variations
+- Performance: 3.6M comparisons/sec (exact), 2.7K/sec (fuzzy)
+
+**Recommendation:** Hybrid approach (exact + fuzzy fallback)
 
 **File:** `src/joke_emporium/db/deduplication.py`
 
-Start with simple text comparison, design for future enhancement:
+Implementation based on experimental results:
 
 ```python
-"""Deduplication logic for jokes."""
+"""Deduplication logic for jokes.
 
+Based on experimental findings from 208k joke analysis:
+- Hash-based exact match: 100% recall on real duplicates
+- Aggressive normalization: 68.5% recall on variations
+- Levenshtein 90%: 71.2% recall on variations
+
+See: experiments/output/EXPERIMENT_RESULTS.md
+"""
+
+import hashlib
+import re
+import unicodedata
 from sqlmodel import Session, select
 from joke_emporium.models.joke import Joke
 from joke_emporium.db.models.staging import StagingJokeDB
@@ -103,16 +125,42 @@ from joke_emporium.db.models.staging import StagingJokeDB
 def normalize_text(text: str) -> str:
     """Normalize joke text for comparison.
 
-    Simple normalization:
-    - Convert to lowercase
-    - Strip whitespace
-    - Remove extra spaces
+    Aggressive normalization (68.5% recall on variations):
+    - Unicode normalization (NFC) - handles 4% of jokes with unicode
+    - Casefold (better than lower for unicode)
+    - Normalize line breaks
+    - Preserve ellipsis (23% of jokes have timing markers)
+    - Remove punctuation (preserves apostrophes)
+    - Normalize whitespace
 
-    Future: More sophisticated normalization
-    - Remove punctuation
-    - Handle common variations (you're vs you are)
+    Based on analysis of 208k jokes:
+    - 23% have ellipsis - preserve for timing
+    - 17% have numbers - consider future normalization
+    - 15% very long (>500 chars)
+    - 10% have SHOUTING - casefolding handles this
     """
-    return text.strip().casefold()
+    # Unicode normalization
+    text = unicodedata.normalize('NFC', text)
+
+    # Casefold (better than lower for unicode)
+    text = text.casefold()
+
+    # Normalize line breaks
+    text = text.replace('\r\n', '\n').replace('\r', '\n')
+
+    # Preserve ellipsis (timing marker)
+    text = text.replace('...', ' ELLIPSIS ')
+
+    # Remove punctuation (except apostrophes in contractions)
+    text = re.sub(r"[^\w\s'ELLIPSIS]", '', text)
+
+    # Restore ellipsis
+    text = text.replace('ELLIPSIS', '...')
+
+    # Normalize whitespace
+    text = re.sub(r'\s+', ' ', text)
+
+    return text.strip()
 
 
 def check_duplicate_in_staging(

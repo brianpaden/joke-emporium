@@ -1,0 +1,602 @@
+[
+  {
+    "source": "reddit_jokes",
+    "original_id": "2ejaw8",
+    "original_text": "And now for something completely different A young female nurse is working the front desk at a sperm bank. A man wearing a ski mask barges in through the front door and holds a gun to her head. He tells her \"Open the vault!\"\n\n\"But sir, this is a sperm bank...\"\n\n\"Just do it!\" The woman complies and opens the vault containing hundreds of vials of donations. \"Now, uncork one and drink it!\n\n\"Sir, I don't understand...\" \n\n\"Do as I say!\" So she uncorks a sample and drinks it down. She chokes on it but is more worried about the mysterious man. The assailant has her do it a few more times. The woman is visibly shaken, but he takes off the ski mask and says\n\n\"See honey, it isn't that hard.\"",
+    "variations": [
+      {
+        "type": "lowercase",
+        "text": "and now for something completely different a young female nurse is working the front desk at a sperm bank. a man wearing a ski mask barges in through the front door and holds a gun to her head. he tells her \"open the vault!\"\n\n\"but sir, this is a sperm bank...\"\n\n\"just do it!\" the woman complies and opens the vault containing hundreds of vials of donations. \"now, uncork one and drink it!\n\n\"sir, i don't understand...\" \n\n\"do as i say!\" so she uncorks a sample and drinks it down. she chokes on it but is more worried about the mysterious man. the assailant has her do it a few more times. the woman is visibly shaken, but he takes off the ski mask and says\n\n\"see honey, it isn't that hard.\"",
+        "expected_match": true
+      },
+      {
+        "type": "uppercase",
+        "text": "AND NOW FOR SOMETHING COMPLETELY DIFFERENT A YOUNG FEMALE NURSE IS WORKING THE FRONT DESK AT A SPERM BANK. A MAN WEARING A SKI MASK BARGES IN THROUGH THE FRONT DOOR AND HOLDS A GUN TO HER HEAD. HE TELLS HER \"OPEN THE VAULT!\"\n\n\"BUT SIR, THIS IS A SPERM BANK...\"\n\n\"JUST DO IT!\" THE WOMAN COMPLIES AND OPENS THE VAULT CONTAINING HUNDREDS OF VIALS OF DONATIONS. \"NOW, UNCORK ONE AND DRINK IT!\n\n\"SIR, I DON'T UNDERSTAND...\" \n\n\"DO AS I SAY!\" SO SHE UNCORKS A SAMPLE AND DRINKS IT DOWN. SHE CHOKES ON IT BUT IS MORE WORRIED ABOUT THE MYSTERIOUS MAN. THE ASSAILANT HAS HER DO IT A FEW MORE TIMES. THE WOMAN IS VISIBLY SHAKEN, BUT HE TAKES OFF THE SKI MASK AND SAYS\n\n\"SEE HONEY, IT ISN'T THAT HARD.\"",
+        "expected_match": true
+      },
+      {
+        "type": "title_case",
+        "text": "And Now For Something Completely Different A Young Female Nurse Is Working The Front Desk At A Sperm Bank. A Man Wearing A Ski Mask Barges In Through The Front Door And Holds A Gun To Her Head. He Tells Her \"Open The Vault!\"\n\n\"But Sir, This Is A Sperm Bank...\"\n\n\"Just Do It!\" The Woman Complies And Opens The Vault Containing Hundreds Of Vials Of Donations. \"Now, Uncork One And Drink It!\n\n\"Sir, I Don'T Understand...\" \n\n\"Do As I Say!\" So She Uncorks A Sample And Drinks It Down. She Chokes On It But Is More Worried About The Mysterious Man. The Assailant Has Her Do It A Few More Times. The Woman Is Visibly Shaken, But He Takes Off The Ski Mask And Says\n\n\"See Honey, It Isn'T That Hard.\"",
+        "expected_match": true
+      },
+      {
+        "type": "no_punctuation",
+        "text": "And now for something completely different A young female nurse is working the front desk at a sperm bank A man wearing a ski mask barges in through the front door and holds a gun to her head He tells her \"Open the vault\"\n\n\"But sir this is a sperm bank\"\n\n\"Just do it\" The woman complies and opens the vault containing hundreds of vials of donations \"Now uncork one and drink it\n\n\"Sir I don't understand\" \n\n\"Do as I say\" So she uncorks a sample and drinks it down She chokes on it but is more worried about the mysterious man The assailant has her do it a few more times The woman is visibly shaken but he takes off the ski mask and says\n\n\"See honey it isn't that hard\"",
+        "expected_match": true
+      },
+      {
+        "type": "extra_punctuation",
+        "text": "And . now . for . something . completely . different . A . young . female . nurse . is . working . the . front . desk . at . a . sperm . bank. . A . man . wearing . a . ski . mask . barges . in . through . the . front . door . and . holds . a . gun . to . her . head. . He . tells . her . \"Open . the . vault!!\"\n\n\"But . sir, . this . is . a . sperm . bank...\"\n\n\"Just . do . it!!\" . The . woman . complies . and . opens . the . vault . containing . hundreds . of . vials . of . donations. . \"Now, . uncork . one . and . drink . it!!\n\n\"Sir, . I . don't . understand...\" . \n\n\"Do . as . I . say!!\" . So . she . uncorks . a . sample . and . drinks . it . down. . She . chokes . on . it . but . is . more . worried . about . the . mysterious . man. . The . assailant . has . her . do . it . a . few . more . times. . The . woman . is . visibly . shaken, . but . he . takes . off . the . ski . mask . and . says\n\n\"See . honey, . it . isn't . that . hard.\"",
+        "expected_match": "maybe"
+      },
+      {
+        "type": "extra_spaces",
+        "text": "And  now  for  something  completely  different  A  young  female  nurse  is  working  the  front  desk  at  a  sperm  bank.  A  man  wearing  a  ski  mask  barges  in  through  the  front  door  and  holds  a  gun  to  her  head.  He  tells  her  \"Open  the  vault!\"  \"But  sir,  this  is  a  sperm  bank...\"  \"Just  do  it!\"  The  woman  complies  and  opens  the  vault  containing  hundreds  of  vials  of  donations.  \"Now,  uncork  one  and  drink  it!  \"Sir,  I  don't  understand...\"  \"Do  as  I  say!\"  So  she  uncorks  a  sample  and  drinks  it  down.  She  chokes  on  it  but  is  more  worried  about  the  mysterious  man.  The  assailant  has  her  do  it  a  few  more  times.  The  woman  is  visibly  shaken,  but  he  takes  off  the  ski  mask  and  says  \"See  honey,  it  isn't  that  hard.\"",
+        "expected_match": true
+      },
+      {
+        "type": "tabs_and_newlines",
+        "text": "And\tnow\tfor\tsomething\tcompletely\tdifferent\tA\tyoung\tfemale\tnurse\tis\tworking\tthe\tfront\tdesk\tat\ta\tsperm\tbank.\n\tA\tman\twearing\ta\tski\tmask\tbarges\tin\tthrough\tthe\tfront\tdoor\tand\tholds\ta\tgun\tto\ther\thead.\n\tHe\ttells\ther\t\"Open\tthe\tvault!\"\n\n\"But\tsir,\tthis\tis\ta\tsperm\tbank.\n.\n.\n\"\n\n\"Just\tdo\tit!\"\tThe\twoman\tcomplies\tand\topens\tthe\tvault\tcontaining\thundreds\tof\tvials\tof\tdonations.\n\t\"Now,\tuncork\tone\tand\tdrink\tit!\n\n\"Sir,\tI\tdon't\tunderstand.\n.\n.\n\"\t\n\n\"Do\tas\tI\tsay!\"\tSo\tshe\tuncorks\ta\tsample\tand\tdrinks\tit\tdown.\n\tShe\tchokes\ton\tit\tbut\tis\tmore\tworried\tabout\tthe\tmysterious\tman.\n\tThe\tassailant\thas\ther\tdo\tit\ta\tfew\tmore\ttimes.\n\tThe\twoman\tis\tvisibly\tshaken,\tbut\the\ttakes\toff\tthe\tski\tmask\tand\tsays\n\n\"See\thoney,\tit\tisn't\tthat\thard.\n\"",
+        "expected_match": true
+      },
+      {
+        "type": "typo_swap",
+        "text": "And now for something completely different A young female nurse is working the front desk at a sperm bank. A man wearing a ski mask barges in through the front door and holds a gun to her head. He tells her \"Open the vault!\"\n\n\"But sir, this is a sperm bank...\"\n\n\"Just do it!\" The woman complies and opens the vault containing hundreds of vials of donations. \"Now, uncork one and drink it!\n\n\"Sir, I don't understand...\" \n\n\"Do as I say!\" So she uncorks a sample and drinks it down. She chokes on it but is more worried about the mysterious man. The assailant has her do it a few more times. The woman is visibly shake,n but he takes off the ski mask and says\n\n\"See honey, it isn't that hard.\"",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_deletion",
+        "text": "And now for something completely different A young female nurse is working the front desk at a sperm bank. A man wearing a ski mask barges in through the front door and holds a gun to her head. He tells her \"Open the vault!\"\n\n\"But sir, this is a sperm bank...\"\n\n\"Just do it!\" The woman complies and opens the vault containing hundreds of vials of donations. \"Now, uncork one and drink it!\n\n\"Sir, I don't understand...\" \n\n\"Do as I say!\" So she uncorks a sample and drinks it down. She hokes on it but is more worried about the mysterious man. The assailant has her do it a few more times. The woman is visibly shaken, but he takes off the ski mask and says\n\n\"See honey, it isn't that hard.\"",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_insertion",
+        "text": "And now for something completely different A young female nurse is working the front desk at a sperm bank. A man wearing a ski mask barges in through the front door and holds a gun to her head. He tells her \"Open the vault!\"\n\n\"But sir, this is a sperm bank...\"\n\n\"Just do it!\" The woman complies and opens the vault containing hundreds of vials of donations. \"Now, uncork one and drink it!\n\n\"Sir, I don't understand...\" \n\n\"Do as I say!\" So she uncorks a sample and drinks it down. She chokes on it but is more worried about the mysterious man. Thei assailant has her do it a few more times. The woman is visibly shaken, but he takes off the ski mask and says\n\n\"See honey, it isn't that hard.\"",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "number_substitution",
+        "text": "And now for something completely different A young female nurse is working the front desk at a sperm bank. A man wearing a ski mask barges in through the front door and holds a gun to her head. He tells her \"Open the vault!\"\n\n\"But sir, this is a sperm bank...\"\n\n\"Just do it!\" The woman complies and opens the vault containing hundreds of vials of donations. \"Now, uncork 1 and drink it!\n\n\"Sir, I don't understand...\" \n\n\"Do as I say!\" So she uncorks a sample and drinks it down. She chokes on it but is more worried about the mysterious man. The assailant has her do it a few more times. The woman is visibly shaken, but he takes off the ski mask and says\n\n\"See honey, it isn't that hard.\"",
+        "expected_match": "maybe"
+      },
+      {
+        "type": "expanded_contractions",
+        "text": "And now for something completely different A young female nurse is working the front desk at a sperm bank. A man wearing a ski mask barges in through the front door and holds a gun to her head. He tells her \"Open the vault!\"\n\n\"But sir, this is a sperm bank...\"\n\n\"Just do it!\" The woman complies and opens the vault containing hundreds of vials of donations. \"Now, uncork one and drink it!\n\n\"Sir, I do not understand...\" \n\n\"Do as I say!\" So she uncorks a sample and drinks it down. She chokes on it but is more worried about the mysterious man. The assailant has her do it a few more times. The woman is visibly shaken, but he takes off the ski mask and says\n\n\"See honey, it isn't that hard.\"",
+        "expected_match": "maybe"
+      }
+    ],
+    "total_variations": 12
+  },
+  {
+    "source": "reddit_jokes",
+    "original_id": "4t326l",
+    "original_text": "What's the difference between a Dove and a Turkey? One has a coo, the other has a coup",
+    "variations": [
+      {
+        "type": "lowercase",
+        "text": "what's the difference between a dove and a turkey? one has a coo, the other has a coup",
+        "expected_match": true
+      },
+      {
+        "type": "uppercase",
+        "text": "WHAT'S THE DIFFERENCE BETWEEN A DOVE AND A TURKEY? ONE HAS A COO, THE OTHER HAS A COUP",
+        "expected_match": true
+      },
+      {
+        "type": "title_case",
+        "text": "What'S The Difference Between A Dove And A Turkey? One Has A Coo, The Other Has A Coup",
+        "expected_match": true
+      },
+      {
+        "type": "no_punctuation",
+        "text": "What's the difference between a Dove and a Turkey One has a coo the other has a coup",
+        "expected_match": true
+      },
+      {
+        "type": "extra_punctuation",
+        "text": "What's . the . difference . between . a . Dove . and . a . Turkey?? . One . has . a . coo, . the . other . has . a . coup",
+        "expected_match": "maybe"
+      },
+      {
+        "type": "extra_spaces",
+        "text": "What's  the  difference  between  a  Dove  and  a  Turkey?  One  has  a  coo,  the  other  has  a  coup",
+        "expected_match": true
+      },
+      {
+        "type": "tabs_and_newlines",
+        "text": "What's\tthe\tdifference\tbetween\ta\tDove\tand\ta\tTurkey?\tOne\thas\ta\tcoo,\tthe\tother\thas\ta\tcoup",
+        "expected_match": true
+      },
+      {
+        "type": "typo_swap",
+        "text": "What's the difference between a Dove and a Turkey? One has a coo, the otherh as a coup",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_deletion",
+        "text": "What'sthe difference between a Dove and a Turkey? One has a coo, the other has a coup",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_insertion",
+        "text": "What's the differenvce between a Dove and a Turkey? One has a coo, the other has a coup",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "number_substitution",
+        "text": "What's the difference between a Dove and a Turkey? 1 has a coo, the other has a coup",
+        "expected_match": "maybe"
+      }
+    ],
+    "total_variations": 11
+  },
+  {
+    "source": "reddit_jokes",
+    "original_id": "5qgfra",
+    "original_text": "What do you call the work of a renowned geologist? Rock solid",
+    "variations": [
+      {
+        "type": "lowercase",
+        "text": "what do you call the work of a renowned geologist? rock solid",
+        "expected_match": true
+      },
+      {
+        "type": "uppercase",
+        "text": "WHAT DO YOU CALL THE WORK OF A RENOWNED GEOLOGIST? ROCK SOLID",
+        "expected_match": true
+      },
+      {
+        "type": "title_case",
+        "text": "What Do You Call The Work Of A Renowned Geologist? Rock Solid",
+        "expected_match": true
+      },
+      {
+        "type": "no_punctuation",
+        "text": "What do you call the work of a renowned geologist Rock solid",
+        "expected_match": true
+      },
+      {
+        "type": "extra_punctuation",
+        "text": "What . do . you . call . the . work . of . a . renowned . geologist?? . Rock . solid",
+        "expected_match": "maybe"
+      },
+      {
+        "type": "extra_spaces",
+        "text": "What  do  you  call  the  work  of  a  renowned  geologist?  Rock  solid",
+        "expected_match": true
+      },
+      {
+        "type": "tabs_and_newlines",
+        "text": "What\tdo\tyou\tcall\tthe\twork\tof\ta\trenowned\tgeologist?\tRock\tsolid",
+        "expected_match": true
+      },
+      {
+        "type": "typo_swap",
+        "text": "What do you call the work of a renownedg eologist? Rock solid",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_deletion",
+        "text": "What do you call the work of a renowned geologist? Rok solid",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_insertion",
+        "text": "What do you call the wyork of a renowned geologist? Rock solid",
+        "expected_match": "fuzzy"
+      }
+    ],
+    "total_variations": 10
+  },
+  {
+    "source": "reddit_jokes",
+    "original_id": "1afr0l",
+    "original_text": "What kind of cigarettes do hippies smoke? Yours.",
+    "variations": [
+      {
+        "type": "lowercase",
+        "text": "what kind of cigarettes do hippies smoke? yours.",
+        "expected_match": true
+      },
+      {
+        "type": "uppercase",
+        "text": "WHAT KIND OF CIGARETTES DO HIPPIES SMOKE? YOURS.",
+        "expected_match": true
+      },
+      {
+        "type": "title_case",
+        "text": "What Kind Of Cigarettes Do Hippies Smoke? Yours.",
+        "expected_match": true
+      },
+      {
+        "type": "no_punctuation",
+        "text": "What kind of cigarettes do hippies smoke Yours",
+        "expected_match": true
+      },
+      {
+        "type": "extra_punctuation",
+        "text": "What . kind . of . cigarettes . do . hippies . smoke?? . Yours.",
+        "expected_match": "maybe"
+      },
+      {
+        "type": "extra_spaces",
+        "text": "What  kind  of  cigarettes  do  hippies  smoke?  Yours.",
+        "expected_match": true
+      },
+      {
+        "type": "tabs_and_newlines",
+        "text": "What\tkind\tof\tcigarettes\tdo\thippies\tsmoke?\tYours.\n",
+        "expected_match": true
+      },
+      {
+        "type": "typo_swap",
+        "text": "What kind of cigarettes doh ippies smoke? Yours.",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_deletion",
+        "text": "What kind ofcigarettes do hippies smoke? Yours.",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_insertion",
+        "text": "What kind of cigarettesn do hippies smoke? Yours.",
+        "expected_match": "fuzzy"
+      }
+    ],
+    "total_variations": 10
+  },
+  {
+    "source": "reddit_jokes",
+    "original_id": "41s95a",
+    "original_text": "What do you call a Chinese prostitute with no legs? Dragon Lips.",
+    "variations": [
+      {
+        "type": "lowercase",
+        "text": "what do you call a chinese prostitute with no legs? dragon lips.",
+        "expected_match": true
+      },
+      {
+        "type": "uppercase",
+        "text": "WHAT DO YOU CALL A CHINESE PROSTITUTE WITH NO LEGS? DRAGON LIPS.",
+        "expected_match": true
+      },
+      {
+        "type": "title_case",
+        "text": "What Do You Call A Chinese Prostitute With No Legs? Dragon Lips.",
+        "expected_match": true
+      },
+      {
+        "type": "no_punctuation",
+        "text": "What do you call a Chinese prostitute with no legs Dragon Lips",
+        "expected_match": true
+      },
+      {
+        "type": "extra_punctuation",
+        "text": "What . do . you . call . a . Chinese . prostitute . with . no . legs?? . Dragon . Lips.",
+        "expected_match": "maybe"
+      },
+      {
+        "type": "extra_spaces",
+        "text": "What  do  you  call  a  Chinese  prostitute  with  no  legs?  Dragon  Lips.",
+        "expected_match": true
+      },
+      {
+        "type": "tabs_and_newlines",
+        "text": "What\tdo\tyou\tcall\ta\tChinese\tprostitute\twith\tno\tlegs?\tDragon\tLips.\n",
+        "expected_match": true
+      },
+      {
+        "type": "typo_swap",
+        "text": "What do you cal la Chinese prostitute with no legs? Dragon Lips.",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_deletion",
+        "text": "What do you call a Chinese prostitte with no legs? Dragon Lips.",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_insertion",
+        "text": "What xdo you call a Chinese prostitute with no legs? Dragon Lips.",
+        "expected_match": "fuzzy"
+      }
+    ],
+    "total_variations": 10
+  },
+  {
+    "source": "reddit_jokes",
+    "original_id": "47bqhj",
+    "original_text": "What did the Muslim on a surfboard say? Aloha Akbar!",
+    "variations": [
+      {
+        "type": "lowercase",
+        "text": "what did the muslim on a surfboard say? aloha akbar!",
+        "expected_match": true
+      },
+      {
+        "type": "uppercase",
+        "text": "WHAT DID THE MUSLIM ON A SURFBOARD SAY? ALOHA AKBAR!",
+        "expected_match": true
+      },
+      {
+        "type": "title_case",
+        "text": "What Did The Muslim On A Surfboard Say? Aloha Akbar!",
+        "expected_match": true
+      },
+      {
+        "type": "no_punctuation",
+        "text": "What did the Muslim on a surfboard say Aloha Akbar",
+        "expected_match": true
+      },
+      {
+        "type": "extra_punctuation",
+        "text": "What . did . the . Muslim . on . a . surfboard . say?? . Aloha . Akbar!!",
+        "expected_match": "maybe"
+      },
+      {
+        "type": "extra_spaces",
+        "text": "What  did  the  Muslim  on  a  surfboard  say?  Aloha  Akbar!",
+        "expected_match": true
+      },
+      {
+        "type": "tabs_and_newlines",
+        "text": "What\tdid\tthe\tMuslim\ton\ta\tsurfboard\tsay?\tAloha\tAkbar!",
+        "expected_match": true
+      },
+      {
+        "type": "typo_swap",
+        "text": "What did the Muslim o na surfboard say? Aloha Akbar!",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_deletion",
+        "text": "What did the Muslim on a surfboard sa? Aloha Akbar!",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_insertion",
+        "text": "What did the Musqlim on a surfboard say? Aloha Akbar!",
+        "expected_match": "fuzzy"
+      }
+    ],
+    "total_variations": 10
+  },
+  {
+    "source": "reddit_jokes",
+    "original_id": "4besu7",
+    "original_text": "I found my stolen briefcase pretty quickly... You could say it was a brief case.",
+    "variations": [
+      {
+        "type": "lowercase",
+        "text": "i found my stolen briefcase pretty quickly... you could say it was a brief case.",
+        "expected_match": true
+      },
+      {
+        "type": "uppercase",
+        "text": "I FOUND MY STOLEN BRIEFCASE PRETTY QUICKLY... YOU COULD SAY IT WAS A BRIEF CASE.",
+        "expected_match": true
+      },
+      {
+        "type": "title_case",
+        "text": "I Found My Stolen Briefcase Pretty Quickly... You Could Say It Was A Brief Case.",
+        "expected_match": true
+      },
+      {
+        "type": "no_punctuation",
+        "text": "I found my stolen briefcase pretty quickly You could say it was a brief case",
+        "expected_match": true
+      },
+      {
+        "type": "extra_punctuation",
+        "text": "I . found . my . stolen . briefcase . pretty . quickly... . You . could . say . it . was . a . brief . case.",
+        "expected_match": "maybe"
+      },
+      {
+        "type": "extra_spaces",
+        "text": "I  found  my  stolen  briefcase  pretty  quickly...  You  could  say  it  was  a  brief  case.",
+        "expected_match": true
+      },
+      {
+        "type": "tabs_and_newlines",
+        "text": "I\tfound\tmy\tstolen\tbriefcase\tpretty\tquickly.\n.\n.\n\tYou\tcould\tsay\tit\twas\ta\tbrief\tcase.\n",
+        "expected_match": true
+      },
+      {
+        "type": "typo_swap",
+        "text": "I found my stolen rbiefcase pretty quickly... You could say it was a brief case.",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_deletion",
+        "text": "I found my stolen briefcase pretty quickly.. You could say it was a brief case.",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_insertion",
+        "text": "I found my stolen briefcase pretty quickly... You could say it was a tbrief case.",
+        "expected_match": "fuzzy"
+      }
+    ],
+    "total_variations": 10
+  },
+  {
+    "source": "reddit_jokes",
+    "original_id": "4p4nsl",
+    "original_text": "What is a long room with many doors called? I'm not sure, I hallways forget",
+    "variations": [
+      {
+        "type": "lowercase",
+        "text": "what is a long room with many doors called? i'm not sure, i hallways forget",
+        "expected_match": true
+      },
+      {
+        "type": "uppercase",
+        "text": "WHAT IS A LONG ROOM WITH MANY DOORS CALLED? I'M NOT SURE, I HALLWAYS FORGET",
+        "expected_match": true
+      },
+      {
+        "type": "title_case",
+        "text": "What Is A Long Room With Many Doors Called? I'M Not Sure, I Hallways Forget",
+        "expected_match": true
+      },
+      {
+        "type": "no_punctuation",
+        "text": "What is a long room with many doors called I'm not sure I hallways forget",
+        "expected_match": true
+      },
+      {
+        "type": "extra_punctuation",
+        "text": "What . is . a . long . room . with . many . doors . called?? . I'm . not . sure, . I . hallways . forget",
+        "expected_match": "maybe"
+      },
+      {
+        "type": "extra_spaces",
+        "text": "What  is  a  long  room  with  many  doors  called?  I'm  not  sure,  I  hallways  forget",
+        "expected_match": true
+      },
+      {
+        "type": "tabs_and_newlines",
+        "text": "What\tis\ta\tlong\troom\twith\tmany\tdoors\tcalled?\tI'm\tnot\tsure,\tI\thallways\tforget",
+        "expected_match": true
+      },
+      {
+        "type": "typo_swap",
+        "text": "What is a long room with many odors called? I'm not sure, I hallways forget",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_deletion",
+        "text": "What is a long room withmany doors called? I'm not sure, I hallways forget",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_insertion",
+        "text": "What is a long room with many doors called? I'm not ysure, I hallways forget",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "expanded_contractions",
+        "text": "What is a long room with many doors called? I am not sure, I hallways forget",
+        "expected_match": "maybe"
+      }
+    ],
+    "total_variations": 11
+  },
+  {
+    "source": "reddit_jokes",
+    "original_id": "1cdhrg",
+    "original_text": "What's the hardest part about being a pedophile? Fitting in.",
+    "variations": [
+      {
+        "type": "lowercase",
+        "text": "what's the hardest part about being a pedophile? fitting in.",
+        "expected_match": true
+      },
+      {
+        "type": "uppercase",
+        "text": "WHAT'S THE HARDEST PART ABOUT BEING A PEDOPHILE? FITTING IN.",
+        "expected_match": true
+      },
+      {
+        "type": "title_case",
+        "text": "What'S The Hardest Part About Being A Pedophile? Fitting In.",
+        "expected_match": true
+      },
+      {
+        "type": "no_punctuation",
+        "text": "What's the hardest part about being a pedophile Fitting in",
+        "expected_match": true
+      },
+      {
+        "type": "extra_punctuation",
+        "text": "What's . the . hardest . part . about . being . a . pedophile?? . Fitting . in.",
+        "expected_match": "maybe"
+      },
+      {
+        "type": "extra_spaces",
+        "text": "What's  the  hardest  part  about  being  a  pedophile?  Fitting  in.",
+        "expected_match": true
+      },
+      {
+        "type": "tabs_and_newlines",
+        "text": "What's\tthe\thardest\tpart\tabout\tbeing\ta\tpedophile?\tFitting\tin.\n",
+        "expected_match": true
+      },
+      {
+        "type": "typo_swap",
+        "text": "What's the hardset part about being a pedophile? Fitting in.",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_deletion",
+        "text": "What's the hardest part about being a pdophile? Fitting in.",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_insertion",
+        "text": "What's the hardest part about being a pedophile? Fittiqng in.",
+        "expected_match": "fuzzy"
+      }
+    ],
+    "total_variations": 10
+  },
+  {
+    "source": "reddit_jokes",
+    "original_id": "4u7mk2",
+    "original_text": "What is the difference between a toad and a horny toad? A toad says rib-it, rib-it. A horny toad says rub-it, rub-it.",
+    "variations": [
+      {
+        "type": "lowercase",
+        "text": "what is the difference between a toad and a horny toad? a toad says rib-it, rib-it. a horny toad says rub-it, rub-it.",
+        "expected_match": true
+      },
+      {
+        "type": "uppercase",
+        "text": "WHAT IS THE DIFFERENCE BETWEEN A TOAD AND A HORNY TOAD? A TOAD SAYS RIB-IT, RIB-IT. A HORNY TOAD SAYS RUB-IT, RUB-IT.",
+        "expected_match": true
+      },
+      {
+        "type": "title_case",
+        "text": "What Is The Difference Between A Toad And A Horny Toad? A Toad Says Rib-It, Rib-It. A Horny Toad Says Rub-It, Rub-It.",
+        "expected_match": true
+      },
+      {
+        "type": "no_punctuation",
+        "text": "What is the difference between a toad and a horny toad A toad says rib-it rib-it A horny toad says rub-it rub-it",
+        "expected_match": true
+      },
+      {
+        "type": "extra_punctuation",
+        "text": "What . is . the . difference . between . a . toad . and . a . horny . toad?? . A . toad . says . rib-it, . rib-it. . A . horny . toad . says . rub-it, . rub-it.",
+        "expected_match": "maybe"
+      },
+      {
+        "type": "extra_spaces",
+        "text": "What  is  the  difference  between  a  toad  and  a  horny  toad?  A  toad  says  rib-it,  rib-it.  A  horny  toad  says  rub-it,  rub-it.",
+        "expected_match": true
+      },
+      {
+        "type": "tabs_and_newlines",
+        "text": "What\tis\tthe\tdifference\tbetween\ta\ttoad\tand\ta\thorny\ttoad?\tA\ttoad\tsays\trib-it,\trib-it.\n\tA\thorny\ttoad\tsays\trub-it,\trub-it.\n",
+        "expected_match": true
+      },
+      {
+        "type": "typo_swap",
+        "text": "What si the difference between a toad and a horny toad? A toad says rib-it, rib-it. A horny toad says rub-it, rub-it.",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_deletion",
+        "text": "What is the difference between a toad and a horny toad? A toad says rib-it, rib-i. A horny toad says rub-it, rub-it.",
+        "expected_match": "fuzzy"
+      },
+      {
+        "type": "typo_insertion",
+        "text": "What is the difference between a toad and a hoprny toad? A toad says rib-it, rib-it. A horny toad says rub-it, rub-it.",
+        "expected_match": "fuzzy"
+      }
+    ],
+    "total_variations": 10
+  }
+]

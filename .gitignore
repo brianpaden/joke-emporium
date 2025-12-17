@@ -216,3 +216,7 @@ __marimo__/
 data/staging.db
 temp/
 nul
+
+# Experiments output
+experiments/output/
+experiments/notebooks/.ipynb_checkpoints/
