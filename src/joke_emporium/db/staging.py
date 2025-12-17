@@ -1,7 +1,7 @@
 """Staging database operations for import validation."""
 
 from collections.abc import Generator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from sqlmodel import Session, SQLModel, create_engine, select
@@ -123,9 +123,7 @@ def get_import_batch(session: Session, import_id: str) -> ImportBatchDB | None:
     return session.exec(statement).first()
 
 
-def get_all_import_batches(
-    session: Session, validation_status: str | None = None
-) -> list[ImportBatchDB]:
+def get_all_import_batches(session: Session, validation_status: str | None = None) -> list[ImportBatchDB]:
     """Get all import batches, optionally filtered by status.
 
     Args:
@@ -143,9 +141,7 @@ def get_all_import_batches(
     return list(session.exec(statement).all())
 
 
-def save_staging_joke(
-    session: Session, joke: Joke, raw_data: dict, import_batch_id: int
-) -> StagingJokeDB:
+def save_staging_joke(session: Session, joke: Joke, raw_data: dict, import_batch_id: int) -> StagingJokeDB:
     """Save a joke to staging database.
 
     Args:
@@ -324,11 +320,7 @@ def delete_import_batch(session: Session, import_id: str) -> bool:
 
 
 def update_review_status(
-    session: Session,
-    staging_id: int,
-    status: ReviewStatus,
-    notes: str | None = None,
-    reviewed_by: str | None = None
+    session: Session, staging_id: int, status: ReviewStatus, notes: str | None = None, reviewed_by: str | None = None
 ) -> bool:
     """Update review status of a staging joke.
 
@@ -353,7 +345,7 @@ def update_review_status(
         staging_joke.review_notes = notes
     if reviewed_by:
         staging_joke.reviewed_by = reviewed_by
-    staging_joke.reviewed_at = datetime.now(timezone.utc)
+    staging_joke.reviewed_at = datetime.now(UTC)
 
     session.add(staging_joke)
     session.commit()
@@ -361,11 +353,7 @@ def update_review_status(
     return True
 
 
-def approve_batch_by_quality(
-    session: Session,
-    import_id: str,
-    min_score: float | None = None
-) -> int:
+def approve_batch_by_quality(session: Session, import_id: str, min_score: float | None = None) -> int:
     """Approve jokes in a batch based on quality score.
 
     Args:
@@ -383,8 +371,7 @@ def approve_batch_by_quality(
 
     # Query pending jokes in batch
     query = select(StagingJokeDB).where(
-        StagingJokeDB.import_batch_id == import_batch.id,
-        StagingJokeDB.review_status == ReviewStatus.PENDING
+        StagingJokeDB.import_batch_id == import_batch.id, StagingJokeDB.review_status == ReviewStatus.PENDING
     )
 
     if min_score is not None:
@@ -396,7 +383,7 @@ def approve_batch_by_quality(
     count = 0
     for staging_joke in staging_jokes:
         staging_joke.review_status = ReviewStatus.APPROVED
-        staging_joke.reviewed_at = datetime.now(timezone.utc)
+        staging_joke.reviewed_at = datetime.now(UTC)
         session.add(staging_joke)
         count += 1
 
@@ -405,10 +392,7 @@ def approve_batch_by_quality(
 
 
 def get_staging_jokes_by_status(
-    session: Session,
-    import_batch_id: int,
-    status: str | None = None,
-    limit: int | None = None
+    session: Session, import_batch_id: int, status: str | None = None, limit: int | None = None
 ) -> list[StagingJokeDB]:
     """Get staging jokes filtered by review status.
 

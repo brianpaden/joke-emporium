@@ -1,7 +1,7 @@
 """Production database operations."""
 
 from collections.abc import Generator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from sqlmodel import Session, SQLModel, create_engine, select
@@ -68,11 +68,7 @@ def get_production_session() -> Generator[Session]:
 
 
 def save_joke_to_production(
-    session: Session,
-    joke: Joke,
-    import_batch_id: int,
-    source_name: str,
-    staging_joke_id: int | None = None
+    session: Session, joke: Joke, import_batch_id: int, source_name: str, staging_joke_id: int | None = None
 ) -> str:
     """Save joke to production database.
 
@@ -135,7 +131,7 @@ def merge_joke_metadata(existing: JokeDB, new: JokeDB) -> None:
     existing.tags_json = json.dumps(sorted(merged_tags))
 
     # Update last_modified
-    existing.last_modified = datetime.now(timezone.utc)
+    existing.last_modified = datetime.now(UTC)
 
     # Re-compute cached fields
     existing.update_computed_fields()

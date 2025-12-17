@@ -21,16 +21,16 @@ def normalize_minimal(text: str) -> str:
 def normalize_aggressive(text: str) -> str:
     """Aggressive normalization: remove punctuation, normalize spaces."""
     # Unicode normalization (NFC)
-    text = unicodedata.normalize('NFC', text)
+    text = unicodedata.normalize("NFC", text)
 
     # Casefold
     text = text.casefold()
 
     # Remove punctuation (except apostrophes in contractions)
-    text = re.sub(r"[^\w\s']", '', text)
+    text = re.sub(r"[^\w\s']", "", text)
 
     # Normalize whitespace
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
 
     return text.strip()
 
@@ -152,12 +152,12 @@ def benchmark_on_duplicates():
             "comparisons": comparisons,
             "recall": recall,
             "time_seconds": elapsed,
-            "comparisons_per_second": comparisons / elapsed if elapsed > 0 else 0
+            "comparisons_per_second": comparisons / elapsed if elapsed > 0 else 0,
         }
 
         print(f"  Matches: {matches}/{comparisons}")
         print(f"  Recall: {recall:.2%}")
-        print(f"  Time: {elapsed:.3f}s ({comparisons/elapsed:.0f} comp/sec)")
+        print(f"  Time: {elapsed:.3f}s ({comparisons / elapsed:.0f} comp/sec)")
 
     # Save results
     output_dir = Path("experiments/output")
@@ -165,11 +165,11 @@ def benchmark_on_duplicates():
 
     output_file = output_dir / "benchmark_duplicates.json"
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump({
-            "test": "duplicate_detection",
-            "duplicate_groups_tested": min(100, len(duplicates)),
-            "results": results
-        }, f, indent=2)
+        json.dump(
+            {"test": "duplicate_detection", "duplicate_groups_tested": min(100, len(duplicates)), "results": results},
+            f,
+            indent=2,
+        )
 
     print(f"\n{'-' * 70}")
     print(f"Results saved to {output_file}")
@@ -234,7 +234,7 @@ def benchmark_on_variations():
                     variation_results[var_type]["matches"] += 1
 
         # Calculate recall per variation type
-        for var_type, stats in variation_results.items():
+        for _var_type, stats in variation_results.items():
             stats["recall"] = stats["matches"] / stats["total"] if stats["total"] > 0 else 0
 
         results[metric_name] = variation_results
@@ -249,11 +249,7 @@ def benchmark_on_variations():
     # Save results
     output_file = Path("experiments/output/benchmark_variations.json")
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump({
-            "test": "variation_detection",
-            "test_cases": len(test_set[:50]),
-            "results": results
-        }, f, indent=2)
+        json.dump({"test": "variation_detection", "test_cases": len(test_set[:50]), "results": results}, f, indent=2)
 
     print(f"\n{'-' * 70}")
     print(f"Results saved to {output_file}")

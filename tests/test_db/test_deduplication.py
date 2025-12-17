@@ -10,17 +10,11 @@ class TestNormalization(unittest.TestCase):
 
     def test_normalize_text_basic(self):
         """Test basic text normalization."""
-        self.assertEqual(
-            normalize_text("  Hello World  "),
-            "hello world"
-        )
+        self.assertEqual(normalize_text("  Hello World  "), "hello world")
 
     def test_normalize_text_casefold(self):
         """Test casefolding."""
-        self.assertEqual(
-            normalize_text("HELLO world"),
-            "hello world"
-        )
+        self.assertEqual(normalize_text("HELLO world"), "hello world")
 
     def test_normalize_text_extra_spaces(self):
         """Test multiple spaces normalization."""

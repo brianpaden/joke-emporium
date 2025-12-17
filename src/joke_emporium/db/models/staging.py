@@ -2,20 +2,25 @@
 
 from datetime import datetime
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from sqlmodel import Field, Relationship, SQLModel
 
 from joke_emporium.db.models.joke import JokeDB
 
+if TYPE_CHECKING:
+    from joke_emporium.models.joke import Joke
+
 
 class ReviewStatus(str, Enum):
     """Status of joke review for merge."""
-    PENDING = "pending"           # Not yet reviewed
-    APPROVED = "approved"         # Ready to merge
-    REJECTED = "rejected"         # Don't merge
-    UNDER_REVIEW = "under_review" # Needs manual review
-    DUPLICATE = "duplicate"       # Duplicate of existing joke
-    MERGED = "merged"             # Already merged to production
+
+    PENDING = "pending"  # Not yet reviewed
+    APPROVED = "approved"  # Ready to merge
+    REJECTED = "rejected"  # Don't merge
+    UNDER_REVIEW = "under_review"  # Needs manual review
+    DUPLICATE = "duplicate"  # Duplicate of existing joke
+    MERGED = "merged"  # Already merged to production
 
 
 class ImportBatchDB(SQLModel, table=True):
@@ -117,20 +122,20 @@ class StagingJokeDB(SQLModel, table=True):
         default="pending", max_length=20, description="Validation status: pending/approved/rejected"
     )
     validation_notes: str | None = Field(default=None, description="Validation errors or notes")
-    duplicate_of: str | None = Field(
-        default=None, max_length=36, description="UUID of duplicate joke if detected"
-    )
+    duplicate_of: str | None = Field(default=None, max_length=36, description="UUID of duplicate joke if detected")
 
     # Review tracking (staging-specific)
-    review_status: str = Field(default=ReviewStatus.PENDING, max_length=20, index=True,
-                               description="Review status for merge")
+    review_status: str = Field(
+        default=ReviewStatus.PENDING, max_length=20, index=True, description="Review status for merge"
+    )
     review_notes: str | None = Field(default=None, description="Review notes or reason")
     reviewed_by: str | None = Field(default=None, max_length=100, description="User who reviewed")
     reviewed_at: datetime | None = Field(default=None, description="When reviewed")
 
     # Duplicate tracking (staging-specific)
-    duplicate_of_uuid: str | None = Field(default=None, max_length=36, index=True,
-                                          description="UUID of duplicate joke if found")
+    duplicate_of_uuid: str | None = Field(
+        default=None, max_length=36, index=True, description="UUID of duplicate joke if found"
+    )
     duplicate_similarity: float | None = Field(default=None, description="Similarity score (0-1)")
 
     # Merge tracking (staging-specific)
@@ -145,7 +150,10 @@ class StagingJokeDB(SQLModel, table=True):
 
     @classmethod
     def from_joke_and_raw(
-        cls, joke: "Joke", raw_data: dict, import_batch_id: int  # noqa: F821
+        cls,
+        joke: "Joke",
+        raw_data: dict,
+        import_batch_id: int,  # noqa: F821
     ) -> "StagingJokeDB":
         """Create staging joke from Joke model and raw data.
 
@@ -158,8 +166,6 @@ class StagingJokeDB(SQLModel, table=True):
             StagingJokeDB instance
         """
         import json
-
-        from joke_emporium.models.joke import Joke
 
         # Convert joke to JokeDB format
         joke_db = JokeDB.from_pydantic(joke)

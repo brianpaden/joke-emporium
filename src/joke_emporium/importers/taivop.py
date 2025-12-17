@@ -7,7 +7,7 @@ Contains ~200k jokes from Reddit, stupidstuff.org, and wocka.com
 import json
 import logging
 from collections.abc import Iterator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -362,7 +362,9 @@ class TaivopImporter(BaseImporter):
                     max_score = max(score_float, 10000)  # Use at least 10000 as max
                     ratings.append(
                         RatingSource(
-                            source="reddit_score" if raw_data.get("_source_platform") == SourcePlatform.REDDIT else "source_score",
+                            source="reddit_score"
+                            if raw_data.get("_source_platform") == SourcePlatform.REDDIT
+                            else "source_score",
                             min_rating=0.0,
                             max_rating=max_score,
                             total_ratings=1,
@@ -416,8 +418,8 @@ class TaivopImporter(BaseImporter):
                         "source_file": source_file,
                     },
                 ),
-                added_date=datetime.now(timezone.utc),
-                last_modified=datetime.now(timezone.utc),
+                added_date=datetime.now(UTC),
+                last_modified=datetime.now(UTC),
                 verified=False,
             )
 

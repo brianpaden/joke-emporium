@@ -8,7 +8,6 @@ against actual duplicate groups and variations found in 208k real jokes.
 import hashlib
 import json
 import re
-import sys
 import unicodedata
 from pathlib import Path
 
@@ -31,27 +30,27 @@ def normalize_for_dedup(text: str) -> str:
     preserving it. This allows "..." and "....." to match.
     """
     # Unicode normalization (handles 3.8%)
-    text = unicodedata.normalize('NFC', text)
+    text = unicodedata.normalize("NFC", text)
 
     # Casefold (handles 10% SHOUTING)
     text = text.casefold()
 
     # Normalize line breaks (handles 15% multiline)
-    text = text.replace('\r\n', '\n').replace('\r', '\n')
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
 
     # Normalize ellipsis to a marker (not strict preservation)
     # This allows multiple dots to match
-    text = text.replace('…', '...')  # Unicode ellipsis to ASCII
-    text = re.sub(r'\.{2,}', ' ELLIPSIS ', text)  # Multiple dots → marker
+    text = text.replace("…", "...")  # Unicode ellipsis to ASCII
+    text = re.sub(r"\.{2,}", " ELLIPSIS ", text)  # Multiple dots → marker
 
     # Remove punctuation (preserve apostrophes and our marker)
-    text = re.sub(r"[^\w\s'ELLIPSIS]", '', text)
+    text = re.sub(r"[^\w\s'ELLIPSIS]", "", text)
 
     # Restore ellipsis as standard marker
-    text = text.replace('ELLIPSIS', '...')
+    text = text.replace("ELLIPSIS", "...")
 
     # Normalize whitespace
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
 
     return text.strip()
 
@@ -59,7 +58,7 @@ def normalize_for_dedup(text: str) -> str:
 def get_hash(text: str) -> str:
     """Get SHA-256 hash of normalized text."""
     normalized = normalize_for_dedup(text)
-    return hashlib.sha256(normalized.encode('utf-8')).hexdigest()
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
 
 def test_on_natural_duplicates():
@@ -115,7 +114,7 @@ def test_on_natural_duplicates():
     recall = perfect_matches / total_groups if total_groups > 0 else 0
 
     print(f"\n{'-' * 70}")
-    print(f"Results:")
+    print("Results:")
     print(f"  Total groups tested: {total_groups}")
     print(f"  Perfect matches: {perfect_matches} ({recall:.1%})")
     print(f"  Partial matches: {partial_matches}")
@@ -124,7 +123,7 @@ def test_on_natural_duplicates():
         "total_groups": total_groups,
         "perfect_matches": perfect_matches,
         "partial_matches": partial_matches,
-        "recall": recall
+        "recall": recall,
     }
 
 
@@ -164,7 +163,7 @@ def test_on_variations():
                 continue
 
             var_hash = get_hash(var_text)
-            matched = (var_hash == original_hash)
+            matched = var_hash == original_hash
 
             if var_type not in variation_results:
                 variation_results[var_type] = {"matches": 0, "total": 0}
@@ -174,11 +173,11 @@ def test_on_variations():
                 variation_results[var_type]["matches"] += 1
 
     # Calculate recall per variation type
-    for var_type, stats in variation_results.items():
+    for _var_type, stats in variation_results.items():
         stats["recall"] = stats["matches"] / stats["total"] if stats["total"] > 0 else 0
 
     # Print results
-    print(f"\nResults by variation type:")
+    print("\nResults by variation type:")
     print(f"{'-' * 70}")
 
     for var_type in sorted(variation_results.keys()):
@@ -198,7 +197,7 @@ def test_on_variations():
         "variation_results": variation_results,
         "total_matches": total_matches,
         "total_tests": total_tests,
-        "overall_recall": overall_recall
+        "overall_recall": overall_recall,
     }
 
 
@@ -213,48 +212,39 @@ def test_edge_cases():
         # Unicode variations
         ("café", "cafe", "Unicode accent", False),  # Different meaning
         ("café", "café", "Unicode NFC/NFD", True),  # Same character, different encoding
-
         # Case variations
         ("Why did the CHICKEN cross the road?", "why did the chicken cross the road?", "Case", True),
         ("WHY DID THE CHICKEN CROSS THE ROAD?", "Why did the chicken cross the road?", "SHOUTING", True),
-
         # Whitespace variations
         ("Why  did  the  chicken", "Why did the chicken", "Extra spaces", True),
         ("Why\tdid\tthe\tchicken", "Why did the chicken", "Tabs", True),
         ("Why\ndid\nthe\nchicken", "Why did the chicken", "Newlines", True),
-
         # Punctuation variations
-        ("I'm not saying I'm Batman... but have you ever seen us together?",
-         "I'm not saying I'm Batman but have you ever seen us together",
-         "Punctuation removed (but ellipsis differs)", False),  # Ellipsis is preserved, so these differ
-        ("Why did the chicken cross the road?",
-         "Why did the chicken cross the road",
-         "Question mark", True),
-
+        (
+            "I'm not saying I'm Batman... but have you ever seen us together?",
+            "I'm not saying I'm Batman but have you ever seen us together",
+            "Punctuation removed (but ellipsis differs)",
+            False,
+        ),  # Ellipsis is preserved, so these differ
+        ("Why did the chicken cross the road?", "Why did the chicken cross the road", "Question mark", True),
         # Ellipsis normalization (normalized, not removed)
         ("Wait for it...", "Wait for it", "Ellipsis vs no ellipsis", False),  # Different jokes
         ("Wait for it...", "Wait for it…", "Ellipsis unicode", True),  # Same joke
         ("Wait for it...", "Wait for it.....", "Multiple dots", True),  # Same joke, normalized
-
         # Apostrophes/contractions
         ("You're going to love this", "You're going to love this", "Contraction", True),
         ("You're going to love this", "Youre going to love this", "Apostrophe style", False),  # Different
-
         # Numbers (not normalized in MVP)
         ("Three guys walk into a bar", "3 guys walk into a bar", "Number words", False),
         ("3 guys walk into a bar", "three guys walk into a bar", "Digit to word", False),
     ]
 
-    results = {
-        "passed": 0,
-        "failed": 0,
-        "failures": []
-    }
+    results = {"passed": 0, "failed": 0, "failures": []}
 
     for text1, text2, description, should_match in edge_cases:
         hash1 = get_hash(text1)
         hash2 = get_hash(text2)
-        matched = (hash1 == hash2)
+        matched = hash1 == hash2
 
         if matched == should_match:
             results["passed"] += 1
@@ -262,13 +252,15 @@ def test_edge_cases():
         else:
             results["failed"] += 1
             status = "FAIL"
-            results["failures"].append({
-                "description": description,
-                "text1": text1,
-                "text2": text2,
-                "expected": should_match,
-                "actual": matched
-            })
+            results["failures"].append(
+                {
+                    "description": description,
+                    "text1": text1,
+                    "text2": text2,
+                    "expected": should_match,
+                    "actual": matched,
+                }
+            )
 
         print(f"  [{status}] {description:25} - Expected: {should_match}, Got: {matched}")
 
@@ -325,17 +317,13 @@ def test_performance():
     rate = sample_size / elapsed
 
     print(f"\n{'-' * 70}")
-    print(f"Results:")
+    print("Results:")
     print(f"  Sample size: {sample_size:,} jokes")
     print(f"  Time: {elapsed:.2f} seconds")
     print(f"  Rate: {rate:,.0f} jokes/sec")
     print(f"  Per joke: {(elapsed / sample_size) * 1000:.2f} ms")
 
-    return {
-        "sample_size": sample_size,
-        "elapsed": elapsed,
-        "rate": rate
-    }
+    return {"sample_size": sample_size, "elapsed": elapsed, "rate": rate}
 
 
 def main():

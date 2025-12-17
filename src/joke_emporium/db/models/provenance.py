@@ -1,8 +1,8 @@
 """Provenance tracking for jokes in production database."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from sqlmodel import Column, Field, JSON, SQLModel
+from sqlmodel import JSON, Column, Field, SQLModel
 
 
 class JokeProvenanceDB(SQLModel, table=True):
@@ -14,15 +14,15 @@ class JokeProvenanceDB(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
     # Joke reference
-    joke_uuid: str = Field(foreign_key="jokes.joke_uuid", index=True, max_length=36,
-                          description="UUID of joke in production")
+    joke_uuid: str = Field(
+        foreign_key="jokes.joke_uuid", index=True, max_length=36, description="UUID of joke in production"
+    )
 
     # Import tracking
     import_batch_id: int | None = Field(default=None, description="Import batch ID from staging")
     staging_joke_id: int | None = Field(default=None, description="Staging joke ID")
     source_name: str = Field(max_length=100, index=True, description="Source identifier")
-    imported_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc),
-                                   description="When imported to production")
+    imported_at: datetime = Field(default_factory=lambda: datetime.now(UTC), description="When imported to production")
 
     # Version tracking
     version: int = Field(default=1, ge=1, description="Provenance record version")

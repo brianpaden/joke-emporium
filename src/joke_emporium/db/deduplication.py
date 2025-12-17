@@ -8,7 +8,6 @@ Based on experimental findings from 208k joke analysis:
 See: experiments/output/EXPERIMENT_RESULTS.md
 """
 
-import hashlib
 import re
 import unicodedata
 
@@ -36,25 +35,25 @@ def normalize_text(text: str) -> str:
     - 10% have SHOUTING - casefolding handles this
     """
     # Unicode normalization
-    text = unicodedata.normalize('NFC', text)
+    text = unicodedata.normalize("NFC", text)
 
     # Casefold (better than lower for unicode)
     text = text.casefold()
 
     # Normalize line breaks
-    text = text.replace('\r\n', '\n').replace('\r', '\n')
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
 
     # Preserve ellipsis (timing marker)
-    text = text.replace('...', ' ELLIPSIS ')
+    text = text.replace("...", " ELLIPSIS ")
 
     # Remove punctuation (except apostrophes in contractions)
-    text = re.sub(r"[^\w\s'ELLIPSIS]", '', text)
+    text = re.sub(r"[^\w\s'ELLIPSIS]", "", text)
 
     # Restore ellipsis
-    text = text.replace('ELLIPSIS', '...')
+    text = text.replace("ELLIPSIS", "...")
 
     # Normalize whitespace
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
 
     return text.strip()
 
@@ -65,9 +64,7 @@ def get_joke_text(joke: Joke) -> str:
 
 
 def check_duplicate_in_staging(
-    session: Session,
-    joke: Joke,
-    import_batch_id: int | None = None
+    session: Session, joke: Joke, import_batch_id: int | None = None
 ) -> tuple[bool, str | None]:
     """Check if joke is duplicate within staging.
 
@@ -100,6 +97,7 @@ def check_duplicate_in_staging(
 
         # Parse staging joke content
         import json
+
         content_data = json.loads(staging_joke.content_json)
         staging_text = " ".join(elem.get("text", "") for elem in content_data)
         staging_normalized = normalize_text(staging_text)
@@ -110,10 +108,7 @@ def check_duplicate_in_staging(
     return (False, None)
 
 
-def check_duplicate_in_production(
-    session: Session,
-    joke: Joke
-) -> tuple[bool, str | None]:
+def check_duplicate_in_production(session: Session, joke: Joke) -> tuple[bool, str | None]:
     """Check if joke exists in production database.
 
     Args:
@@ -136,6 +131,7 @@ def check_duplicate_in_production(
     for prod_joke in production_jokes:
         # Parse production joke content
         import json
+
         content_data = json.loads(prod_joke.content_json)
         prod_text = " ".join(elem.get("text", "") for elem in content_data)
         prod_normalized = normalize_text(prod_text)
@@ -146,10 +142,7 @@ def check_duplicate_in_production(
     return (False, None)
 
 
-def mark_duplicates_in_batch(
-    session: Session,
-    import_batch_id: int
-) -> int:
+def mark_duplicates_in_batch(session: Session, import_batch_id: int) -> int:
     """Find and mark duplicates within an import batch.
 
     Args:
@@ -166,8 +159,7 @@ def mark_duplicates_in_batch(
 
     # Get all jokes in batch with pending status
     query = select(StagingJokeDB).where(
-        StagingJokeDB.import_batch_id == import_batch_id,
-        StagingJokeDB.review_status == ReviewStatus.PENDING
+        StagingJokeDB.import_batch_id == import_batch_id, StagingJokeDB.review_status == ReviewStatus.PENDING
     )
     staging_jokes = session.exec(query).all()
 

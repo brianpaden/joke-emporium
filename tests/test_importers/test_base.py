@@ -2,6 +2,7 @@
 
 import unittest
 from collections.abc import Iterator
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 
@@ -34,26 +35,23 @@ class MockImporter(BaseImporter):
 
     def parse(self, data_path: Path) -> Iterator[dict[str, Any]]:
         """Mock parse method."""
-        for item in self.mock_data:
-            yield item
+        yield from self.mock_data
 
     def transform(self, raw_data: dict[str, Any]) -> Joke | None:
         """Mock transform method."""
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         if "fail" in raw_data:
             return None
 
         return Joke(
             id=f"test-{raw_data.get('id', 'unknown')}",
-            content=[
-                JokeElement(type=ElementType.TEXT, text=raw_data.get("text", "Test joke"))
-            ],
+            content=[JokeElement(type=ElementType.TEXT, text=raw_data.get("text", "Test joke"))],
             metadata=JokeMetadata(
                 language="en",
                 authors=[Author(id="test", type=AuthorType.ANONYMOUS, name="Test")],
-                added_date=datetime.now(timezone.utc),
-                last_modified=datetime.now(timezone.utc),
+                added_date=datetime.now(UTC),
+                last_modified=datetime.now(UTC),
                 verified=False,
             ),
         )
@@ -101,7 +99,7 @@ class TestBaseImporter(unittest.TestCase):
 
     def test_validate_valid_joke(self):
         """Test validation of valid joke."""
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         joke = Joke(
             id="test-123",
@@ -109,8 +107,8 @@ class TestBaseImporter(unittest.TestCase):
             metadata=JokeMetadata(
                 language="en",
                 authors=[Author(id="test", type=AuthorType.ANONYMOUS, name="Test")],
-                added_date=datetime.now(timezone.utc),
-                last_modified=datetime.now(timezone.utc),
+                added_date=datetime.now(UTC),
+                last_modified=datetime.now(UTC),
                 verified=False,
             ),
         )
@@ -122,7 +120,7 @@ class TestBaseImporter(unittest.TestCase):
 
     def test_validate_joke_with_no_content(self):
         """Test validation catches empty content in validate method."""
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         # Create a joke with content, then manually set it to empty for testing
         # (Pydantic won't allow empty content in __init__)
@@ -132,8 +130,8 @@ class TestBaseImporter(unittest.TestCase):
             metadata=JokeMetadata(
                 language="en",
                 authors=[Author(id="test", type=AuthorType.ANONYMOUS, name="Test")],
-                added_date=datetime.now(timezone.utc),
-                last_modified=datetime.now(timezone.utc),
+                added_date=datetime.now(UTC),
+                last_modified=datetime.now(UTC),
                 verified=False,
             ),
         )
@@ -148,7 +146,7 @@ class TestBaseImporter(unittest.TestCase):
 
     def test_validate_joke_with_empty_text(self):
         """Test validation fails for joke with empty text."""
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         joke = Joke(
             id="test-789",
@@ -156,8 +154,8 @@ class TestBaseImporter(unittest.TestCase):
             metadata=JokeMetadata(
                 language="en",
                 authors=[Author(id="test", type=AuthorType.ANONYMOUS, name="Test")],
-                added_date=datetime.now(timezone.utc),
-                last_modified=datetime.now(timezone.utc),
+                added_date=datetime.now(UTC),
+                last_modified=datetime.now(UTC),
                 verified=False,
             ),
         )

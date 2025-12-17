@@ -6,6 +6,7 @@ from pathlib import Path
 
 import click
 
+from joke_emporium.db.models.staging import ReviewStatus
 from joke_emporium.db.staging import (
     approve_batch_by_quality,
     approve_staging_joke,
@@ -19,13 +20,9 @@ from joke_emporium.db.staging import (
     reject_staging_joke,
     update_review_status,
 )
-from joke_emporium.db.models.staging import ReviewStatus
-from joke_emporium.models.joke import Joke
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -48,9 +45,7 @@ def cli() -> None:
     default=None,
     help="Path to staging database (default: data/staging.db)",
 )
-def import_cmd(
-    source: str, validate: bool, max_records: int | None, staging_db: str | None
-) -> None:
+def import_cmd(source: str, validate: bool, max_records: int | None, staging_db: str | None) -> None:
     """Import jokes from a data source.
 
     SOURCE: Data source to import from (currently supports: taivop)
@@ -88,9 +83,7 @@ def import_cmd(
             importer = TaivopImporter()
 
             with next(get_staging_session()) as session:
-                metadata = importer.import_to_staging(
-                    session=session, validate=validate, max_records=max_records
-                )
+                metadata = importer.import_to_staging(session=session, validate=validate, max_records=max_records)
 
                 click.echo("\n" + "=" * 60)
                 click.echo("Import Complete!")
@@ -99,18 +92,16 @@ def import_cmd(
                 click.echo(f"Source: {metadata.source}")
                 click.echo(f"Total records: {metadata.total_records}")
                 click.echo(
-                    f"Successful: {metadata.successful} "
-                    f"({metadata.successful / metadata.total_records * 100:.1f}%)"
+                    f"Successful: {metadata.successful} ({metadata.successful / metadata.total_records * 100:.1f}%)"
                 )
-                click.echo(
-                    f"Failed: {metadata.failed} "
-                    f"({metadata.failed / metadata.total_records * 100:.1f}%)"
-                )
+                click.echo(f"Failed: {metadata.failed} ({metadata.failed / metadata.total_records * 100:.1f}%)")
                 click.echo(f"Status: {metadata.validation_status.value}")
 
                 click.echo("\nNext steps:")
                 click.echo(f"  1. Inspect staging: python -m joke_emporium.importers.cli inspect {metadata.import_id}")
-                click.echo(f"  2. Merge to production: python -m joke_emporium.importers.cli merge {metadata.import_id}")
+                click.echo(
+                    f"  2. Merge to production: python -m joke_emporium.importers.cli merge {metadata.import_id}"
+                )
 
         else:
             click.echo(f"Unknown source: {source}", err=True)
@@ -152,7 +143,9 @@ def list_imports(status: str | None, staging_db: str | None) -> None:
                 return
 
             click.echo(f"\nFound {len(batches)} import batch(es):\n")
-            click.echo(f"{'Import ID':<38} {'Source':<25} {'Date':<20} {'Total':<8} {'Success':<8} {'Failed':<8} {'Status':<10}")
+            click.echo(
+                f"{'Import ID':<38} {'Source':<25} {'Date':<20} {'Total':<8} {'Success':<8} {'Failed':<8} {'Status':<10}"
+            )
             click.echo("-" * 130)
 
             for batch in batches:
@@ -381,7 +374,7 @@ def reset(yes: bool, staging_db: str | None) -> None:
         # Reinitialize with empty database
         db_url = f"sqlite:///{db_path}"
         init_staging_db(db_url)
-        click.echo(f"Reinitialized empty staging database")
+        click.echo("Reinitialized empty staging database")
         click.echo("\nStaging database has been reset successfully.")
 
     except Exception as e:
@@ -472,9 +465,7 @@ def approve_batch_cmd(import_id: str, min_score: float | None, staging_db: str |
     default=None,
     help="Path to staging database",
 )
-def review_cmd(
-    import_id: str, status: str, limit: int, verbose: bool, staging_db: str | None
-) -> None:
+def review_cmd(import_id: str, status: str, limit: int, verbose: bool, staging_db: str | None) -> None:
     """Review jokes in an import batch before merging.
 
     IMPORT_ID: UUID of the import batch
@@ -502,10 +493,7 @@ def review_cmd(
 
             # Get jokes
             jokes = get_staging_jokes_by_status(
-                session,
-                batch.id,
-                status=None if status == "all" else status,
-                limit=limit
+                session, batch.id, status=None if status == "all" else status, limit=limit
             )
 
             if not jokes:
@@ -517,6 +505,7 @@ def review_cmd(
 
             for staging_joke in jokes:
                 import json
+
                 # Parse joke content
                 content_data = json.loads(staging_joke.content_json)
                 joke_text = " ".join(elem.get("text", "") for elem in content_data)
@@ -578,9 +567,7 @@ def review_cmd(
     default=None,
     help="Path to production database",
 )
-def merge(
-    import_id: str, dry_run: bool, staging_db: str | None, prod_db: str | None
-) -> None:
+def merge(import_id: str, dry_run: bool, staging_db: str | None, prod_db: str | None) -> None:
     """Merge approved staging jokes to production database.
 
     IMPORT_ID: UUID of the import batch to merge
@@ -596,8 +583,8 @@ def merge(
         python -m joke_emporium.importers.cli merge <import_id>
     """
     try:
-        from joke_emporium.db.production import get_production_session, init_production_db
         from joke_emporium.db.merge import merge_approved_jokes
+        from joke_emporium.db.production import get_production_session, init_production_db
 
         # Initialize databases
         staging_db_url = f"sqlite:///{staging_db}" if staging_db else None
@@ -616,11 +603,7 @@ def merge(
             with next(get_production_session()) as production_session:
                 try:
                     stats = merge_approved_jokes(
-                        staging_session,
-                        production_session,
-                        batch.id,
-                        batch.source,
-                        dry_run=dry_run
+                        staging_session, production_session, batch.id, batch.source, dry_run=dry_run
                     )
 
                     if dry_run:

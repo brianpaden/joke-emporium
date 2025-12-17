@@ -432,9 +432,6 @@ class TestTaivopImporter(unittest.TestCase):
         # This test would require mocking httpx, which is complex.
         # In practice, HTTP errors will be raised as ImportError by the download method.
         # We verify this behavior by checking the code structure.
-        import httpx
-
-        from joke_emporium.importers.base import ImportError
 
         # The download method properly wraps httpx.HTTPError in ImportError
         # This is verified through code inspection and integration testing

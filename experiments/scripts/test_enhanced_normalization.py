@@ -42,17 +42,26 @@ def normalize_for_dedup_enhanced(text: str) -> str:
 
     # ENHANCEMENT 1: Remove articles (a, an, the)
     # Use word boundaries to avoid matching within words
-    text = re.sub(r'\b(a|an|the)\b', ' ', text, flags=re.IGNORECASE)
+    text = re.sub(r"\b(a|an|the)\b", " ", text, flags=re.IGNORECASE)
 
     # ENHANCEMENT 2: Remove common filler/stop words
     # These don't change joke meaning but add noise
     stop_words = {
-        'just', 'really', 'very', 'actually', 'basically', 'literally',
-        'totally', 'completely', 'absolutely', 'exactly', 'definitely'
+        "just",
+        "really",
+        "very",
+        "actually",
+        "basically",
+        "literally",
+        "totally",
+        "completely",
+        "absolutely",
+        "exactly",
+        "definitely",
     }
     words = text.split()
     words = [w for w in words if w not in stop_words]
-    text = ' '.join(words)
+    text = " ".join(words)
 
     # Normalize whitespace (cleanup after word removal)
     text = re.sub(r"\s+", " ", text)
@@ -80,10 +89,10 @@ def analyze_improvements():
         print("Please run measure_semantic_duplicates.py first")
         return
 
-    with open(results_file, encoding='utf-8') as f:
+    with open(results_file, encoding="utf-8") as f:
         data = json.load(f)
 
-    examples = data.get('examples', [])
+    examples = data.get("examples", [])
 
     if not examples:
         print("No semantic duplicate examples found in results")
@@ -102,9 +111,9 @@ def analyze_improvements():
 
     # Test each example
     for i, example in enumerate(examples, 1):
-        joke1 = example['joke1']
-        joke2 = example['joke2']
-        similarity = example['similarity']
+        joke1 = example["joke1"]
+        joke2 = example["joke2"]
+        similarity = example["similarity"]
 
         # Test baseline normalization
         baseline_hash1 = get_hash(joke1, enhanced=False)
@@ -124,20 +133,10 @@ def analyze_improvements():
 
             if not baseline_match:
                 # Enhanced caught something baseline missed
-                newly_caught.append({
-                    'pair': i,
-                    'joke1': joke1,
-                    'joke2': joke2,
-                    'similarity': similarity
-                })
+                newly_caught.append({"pair": i, "joke1": joke1, "joke2": joke2, "similarity": similarity})
         else:
             # Still missed by enhanced
-            still_missed.append({
-                'pair': i,
-                'joke1': joke1,
-                'joke2': joke2,
-                'similarity': similarity
-            })
+            still_missed.append({"pair": i, "joke1": joke1, "joke2": joke2, "similarity": similarity})
 
     # Calculate statistics
     total = len(examples)
@@ -165,10 +164,10 @@ def analyze_improvements():
 
         for item in newly_caught[:10]:  # Show first 10
             print(f"\nPair {item['pair']} - Similarity: {item['similarity']:.1%}")
-            print(f"-" * 80)
+            print("-" * 80)
 
-            j1 = item['joke1']
-            j2 = item['joke2']
+            j1 = item["joke1"]
+            j2 = item["joke2"]
 
             # Truncate if too long
             if len(j1) > 150:
@@ -180,10 +179,10 @@ def analyze_improvements():
             print(f"Joke B: {j2}")
 
             # Show what changed in normalization
-            baseline1 = normalize_for_dedup_baseline(item['joke1'])
-            baseline2 = normalize_for_dedup_baseline(item['joke2'])
-            enhanced1 = normalize_for_dedup_enhanced(item['joke1'])
-            enhanced2 = normalize_for_dedup_enhanced(item['joke2'])
+            baseline1 = normalize_for_dedup_baseline(item["joke1"])
+            _baseline2 = normalize_for_dedup_baseline(item["joke2"])
+            enhanced1 = normalize_for_dedup_enhanced(item["joke1"])
+            _enhanced2 = normalize_for_dedup_enhanced(item["joke2"])
 
             if len(baseline1) > 100:
                 baseline1 = baseline1[:100] + "..."
@@ -203,10 +202,10 @@ def analyze_improvements():
 
         for item in still_missed[:5]:  # Show first 5
             print(f"\nPair {item['pair']} - Similarity: {item['similarity']:.1%}")
-            print(f"-" * 80)
+            print("-" * 80)
 
-            j1 = item['joke1']
-            j2 = item['joke2']
+            j1 = item["joke1"]
+            j2 = item["joke2"]
 
             # Truncate if too long
             if len(j1) > 150:
@@ -224,14 +223,14 @@ def analyze_improvements():
     print()
 
     if improvement > 5:
-        print("SIGNIFICANT: Enhanced normalization provides significant improvement (+{:.1f}%)".format(improvement))
+        print(f"SIGNIFICANT: Enhanced normalization provides significant improvement (+{improvement:.1f}%)")
         print("   RECOMMEND: Implement enhanced normalization for Sprint 3")
         print()
         print("   Changes to implement:")
         print("   1. Add article removal (a, an, the)")
         print("   2. Add stop word removal (just, really, very, etc.)")
     elif improvement > 0:
-        print("MARGINAL: Enhanced normalization provides marginal improvement (+{:.1f}%)".format(improvement))
+        print(f"MARGINAL: Enhanced normalization provides marginal improvement (+{improvement:.1f}%)")
         print("   RECOMMEND: Consider for Phase 2")
     else:
         print("NO IMPROVEMENT: Enhanced normalization provides no improvement")
@@ -247,15 +246,15 @@ def analyze_improvements():
     # Save detailed results
     output_file = Path("experiments/output/enhanced_normalization_test.json")
     results = {
-        'total_pairs': total,
-        'baseline_caught': baseline_catches,
-        'enhanced_caught': enhanced_catches,
-        'improvement_percentage': improvement,
-        'newly_caught_examples': newly_caught[:20],
-        'still_missed_examples': still_missed[:20]
+        "total_pairs": total,
+        "baseline_caught": baseline_catches,
+        "enhanced_caught": enhanced_catches,
+        "improvement_percentage": improvement,
+        "newly_caught_examples": newly_caught[:20],
+        "still_missed_examples": still_missed[:20],
     }
 
-    with open(output_file, 'w', encoding='utf-8') as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
     print(f"\n{'=' * 80}")
@@ -272,29 +271,27 @@ def test_specific_cases():
 
     test_cases = [
         # Article differences
-        ("Why can't Helen Keller drive?",
-         "Why can't Helen Keller drive a car?",
-         "Article addition"),
-
+        ("Why can't Helen Keller drive?", "Why can't Helen Keller drive a car?", "Article addition"),
         # Number variations (still won't match without number normalization)
-        ("What's the difference between a wife and a girlfriend? About 45 pounds.",
-         "What's the difference between a wife and a girlfriend? About 35 pounds",
-         "Number difference"),
-
+        (
+            "What's the difference between a wife and a girlfriend? About 45 pounds.",
+            "What's the difference between a wife and a girlfriend? About 35 pounds",
+            "Number difference",
+        ),
         # Stop word differences
-        ("You go back up there and give that bus driver a piece of your mind",
-         "You go back up there and give him a piece of your mind",
-         "Pronoun substitution"),
-
+        (
+            "You go back up there and give that bus driver a piece of your mind",
+            "You go back up there and give him a piece of your mind",
+            "Pronoun substitution",
+        ),
         # Filler words
-        ("I'm not saying I'm Batman but have you ever seen us together",
-         "I'm not saying I'm Batman... but have you really ever seen us together",
-         "Filler word 'really'"),
-
+        (
+            "I'm not saying I'm Batman but have you ever seen us together",
+            "I'm not saying I'm Batman... but have you really ever seen us together",
+            "Filler word 'really'",
+        ),
         # Multiple enhancements
-        ("A man walks into a bar",
-         "The man walks into the bar",
-         "Articles"),
+        ("A man walks into a bar", "The man walks into the bar", "Articles"),
     ]
 
     for joke1, joke2, description in test_cases:

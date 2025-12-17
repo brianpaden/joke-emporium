@@ -3,7 +3,7 @@
 import logging
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -150,7 +150,7 @@ class BaseImporter(ABC):
             ImportError: If critical error occurs during import
         """
         import_id = str(uuid4())
-        start_time = datetime.now(timezone.utc)
+        start_time = datetime.now(UTC)
 
         logger.info(f"Starting import from {self.source_name} (import_id={import_id})")
 
@@ -178,7 +178,7 @@ class BaseImporter(ABC):
             logger.info(f"Downloaded to {data_path}")
 
             # Step 1.5: Count total if method exists (for progress tracking)
-            if hasattr(self, 'count_total_jokes'):
+            if hasattr(self, "count_total_jokes"):
                 logger.info("Counting total jokes...")
                 progress.total = self.count_total_jokes(data_path)
                 logger.info(f"Total jokes to process: {progress.total:,}")
@@ -211,9 +211,7 @@ class BaseImporter(ABC):
                         if not is_valid:
                             progress.failed += 1
                             metadata.failed += 1
-                            logger.warning(
-                                f"Validation failed for record {progress.processed}: {errors}"
-                            )
+                            logger.warning(f"Validation failed for record {progress.processed}: {errors}")
                             continue
 
                     # Add to batch

@@ -36,57 +36,39 @@ def create_variations(joke: dict, source: str) -> list[dict]:
     if not original_text or len(original_text) < 20:
         return []
 
-    variations = [
-        {"type": "original", "text": original_text}
-    ]
+    variations = [{"type": "original", "text": original_text}]
 
     # 1. Case variations
-    variations.append({
-        "type": "lowercase",
-        "text": original_text.lower(),
-        "expected_match": True
-    })
+    variations.append({"type": "lowercase", "text": original_text.lower(), "expected_match": True})
 
-    variations.append({
-        "type": "uppercase",
-        "text": original_text.upper(),
-        "expected_match": True
-    })
+    variations.append({"type": "uppercase", "text": original_text.upper(), "expected_match": True})
 
-    variations.append({
-        "type": "title_case",
-        "text": original_text.title(),
-        "expected_match": True
-    })
+    variations.append({"type": "title_case", "text": original_text.title(), "expected_match": True})
 
     # 2. Punctuation variations
-    no_punct = re.sub(r'[.,!?;:]', '', original_text)
+    no_punct = re.sub(r"[.,!?;:]", "", original_text)
     if no_punct != original_text:
-        variations.append({
-            "type": "no_punctuation",
-            "text": no_punct,
-            "expected_match": True
-        })
+        variations.append({"type": "no_punctuation", "text": no_punct, "expected_match": True})
 
-    extra_punct = original_text.replace(' ', ' . ').replace('!', '!!').replace('?', '??')
-    variations.append({
-        "type": "extra_punctuation",
-        "text": extra_punct,
-        "expected_match": "maybe"  # Depends on normalization
-    })
+    extra_punct = original_text.replace(" ", " . ").replace("!", "!!").replace("?", "??")
+    variations.append(
+        {
+            "type": "extra_punctuation",
+            "text": extra_punct,
+            "expected_match": "maybe",  # Depends on normalization
+        }
+    )
 
     # 3. Whitespace variations
-    variations.append({
-        "type": "extra_spaces",
-        "text": '  '.join(original_text.split()),
-        "expected_match": True
-    })
+    variations.append({"type": "extra_spaces", "text": "  ".join(original_text.split()), "expected_match": True})
 
-    variations.append({
-        "type": "tabs_and_newlines",
-        "text": original_text.replace(' ', '\t').replace('.', '.\n'),
-        "expected_match": True
-    })
+    variations.append(
+        {
+            "type": "tabs_and_newlines",
+            "text": original_text.replace(" ", "\t").replace(".", ".\n"),
+            "expected_match": True,
+        }
+    )
 
     # 4. Typos (character-level)
     if len(original_text) > 30:
@@ -94,52 +76,42 @@ def create_variations(joke: dict, source: str) -> list[dict]:
         chars = list(original_text)
         swap_idx = random.randint(5, len(chars) - 5)
         chars[swap_idx], chars[swap_idx + 1] = chars[swap_idx + 1], chars[swap_idx]
-        variations.append({
-            "type": "typo_swap",
-            "text": ''.join(chars),
-            "expected_match": "fuzzy"  # Needs Levenshtein
-        })
+        variations.append(
+            {
+                "type": "typo_swap",
+                "text": "".join(chars),
+                "expected_match": "fuzzy",  # Needs Levenshtein
+            }
+        )
 
         # Delete a character
         chars = list(original_text)
         del_idx = random.randint(5, len(chars) - 5)
         del chars[del_idx]
-        variations.append({
-            "type": "typo_deletion",
-            "text": ''.join(chars),
-            "expected_match": "fuzzy"
-        })
+        variations.append({"type": "typo_deletion", "text": "".join(chars), "expected_match": "fuzzy"})
 
         # Insert a character
         chars = list(original_text)
         ins_idx = random.randint(5, len(chars) - 5)
-        chars.insert(ins_idx, random.choice('abcdefghijklmnopqrstuvwxyz'))
-        variations.append({
-            "type": "typo_insertion",
-            "text": ''.join(chars),
-            "expected_match": "fuzzy"
-        })
+        chars.insert(ins_idx, random.choice("abcdefghijklmnopqrstuvwxyz"))
+        variations.append({"type": "typo_insertion", "text": "".join(chars), "expected_match": "fuzzy"})
 
     # 5. Number variations
     # "three" -> "3"
     text_with_numbers = original_text
-    replacements = {
-        r'\bone\b': '1',
-        r'\btwo\b': '2',
-        r'\bthree\b': '3',
-        r'\bfour\b': '4',
-        r'\bfive\b': '5'
-    }
+    replacements = {r"\bone\b": "1", r"\btwo\b": "2", r"\bthree\b": "3", r"\bfour\b": "4", r"\bfive\b": "5"}
 
     for pattern, replacement in replacements.items():
         text_with_numbers = re.sub(pattern, replacement, text_with_numbers, flags=re.IGNORECASE)
 
     if text_with_numbers != original_text:
-        variations.append({
-            "type": "number_substitution",
-            "text": text_with_numbers,
-            "expected_match": "maybe"  # Depends on normalization
-        })
+        variations.append(
+            {
+                "type": "number_substitution",
+                "text": text_with_numbers,
+                "expected_match": "maybe",  # Depends on normalization
+            }
+        )
 
     # 6. Contraction variations
     contractions = {
@@ -148,7 +120,7 @@ def create_variations(joke: dict, source: str) -> list[dict]:
         r"can't": "cannot",
         r"won't": "will not",
         r"I'm": "I am",
-        r"it's": "it is"
+        r"it's": "it is",
     }
 
     expanded = original_text
@@ -156,30 +128,28 @@ def create_variations(joke: dict, source: str) -> list[dict]:
         expanded = re.sub(contraction, expansion, expanded, flags=re.IGNORECASE)
 
     if expanded != original_text:
-        variations.append({
-            "type": "expanded_contractions",
-            "text": expanded,
-            "expected_match": "maybe"
-        })
+        variations.append({"type": "expanded_contractions", "text": expanded, "expected_match": "maybe"})
 
     # 7. Minor word changes (paraphrase simulation)
     # Only for very specific patterns we can reliably change
     paraphrase = original_text
     simple_substitutions = {
-        r'\bvery\s+': 'really ',
-        r'\bsaid\b': 'told',
-        r'\basked\b': 'said',
+        r"\bvery\s+": "really ",
+        r"\bsaid\b": "told",
+        r"\basked\b": "said",
     }
 
     for pattern, replacement in simple_substitutions.items():
         paraphrase = re.sub(pattern, replacement, paraphrase, flags=re.IGNORECASE)
 
     if paraphrase != original_text:
-        variations.append({
-            "type": "minor_paraphrase",
-            "text": paraphrase,
-            "expected_match": "semantic"  # Needs semantic similarity
-        })
+        variations.append(
+            {
+                "type": "minor_paraphrase",
+                "text": paraphrase,
+                "expected_match": "semantic",  # Needs semantic similarity
+            }
+        )
 
     return variations
 
@@ -247,16 +217,18 @@ def create_variation_test_set():
             var_type = var["type"]
             variation_counts[var_type] = variation_counts.get(var_type, 0) + 1
 
-        test_set.append({
-            "source": source,
-            "original_id": joke.get("id"),
-            "original_text": original_text,
-            "variations": variations[1:],  # Exclude original from variations list
-            "total_variations": len(variations) - 1
-        })
+        test_set.append(
+            {
+                "source": source,
+                "original_id": joke.get("id"),
+                "original_text": original_text,
+                "variations": variations[1:],  # Exclude original from variations list
+                "total_variations": len(variations) - 1,
+            }
+        )
 
     print(f"Created variations for {len(test_set)} jokes")
-    print(f"\nVariation type counts:")
+    print("\nVariation type counts:")
     for var_type in sorted(variation_counts.keys()):
         print(f"  {var_type:25} {variation_counts[var_type]:>5}")
 
@@ -286,9 +258,9 @@ def create_variation_test_set():
         print(f"\nSource: {example['source']}")
         print(f"Original: {example['original_text'][:100]}...")
         print(f"\nVariations ({example['total_variations']} total):")
-        for var in example['variations'][:5]:
-            text = var['text'][:80] + "..." if len(var['text']) > 80 else var['text']
-            match = var.get('expected_match', 'unknown')
+        for var in example["variations"][:5]:
+            text = var["text"][:80] + "..." if len(var["text"]) > 80 else var["text"]
+            match = var.get("expected_match", "unknown")
             print(f"  [{var['type']:20}] {match:8} - {text}")
 
     print(f"\n{'-' * 70}")

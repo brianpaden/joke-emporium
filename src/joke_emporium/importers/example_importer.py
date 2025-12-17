@@ -8,6 +8,7 @@ This is a working example that imports from a simple JSON file format.
 
 import json
 from collections.abc import Iterator
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -100,8 +101,7 @@ class ExampleImporter(BaseImporter):
         with open(data_path) as f:
             data = json.load(f)
 
-        for joke_data in data:
-            yield joke_data
+        yield from data
 
     def transform(self, raw_data: dict[str, Any]) -> Joke | None:
         """Transform raw data to Joke model.
@@ -112,7 +112,7 @@ class ExampleImporter(BaseImporter):
         Returns:
             Joke model instance, or None if transformation fails
         """
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         try:
             # Generate UUID
@@ -168,8 +168,8 @@ class ExampleImporter(BaseImporter):
                     scraped_date=None,
                     metadata={"source_id": raw_data.get("id")},
                 ),
-                added_date=datetime.now(timezone.utc),
-                last_modified=datetime.now(timezone.utc),
+                added_date=datetime.now(UTC),
+                last_modified=datetime.now(UTC),
                 verified=False,
             )
 

@@ -1,7 +1,7 @@
 """Unit tests for importer models."""
 
 import unittest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from joke_emporium.importers.models import (
     ImportMetadata,
@@ -26,7 +26,7 @@ class TestImportMetadata(unittest.TestCase):
 
     def test_create_valid_metadata(self):
         """Test creating valid ImportMetadata."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         metadata = ImportMetadata(
             import_id="test-import-123",
@@ -46,7 +46,7 @@ class TestImportMetadata(unittest.TestCase):
 
     def test_metadata_with_optional_fields(self):
         """Test ImportMetadata with optional fields."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         metadata = ImportMetadata(
             import_id="test-import-456",
@@ -125,9 +125,7 @@ class TestValidationResult(unittest.TestCase):
 
     def test_create_invalid_result_with_errors(self):
         """Test creating invalid ValidationResult with errors."""
-        result = ValidationResult(
-            is_valid=False, errors=["Error 1", "Error 2"], warnings=["Warning 1"]
-        )
+        result = ValidationResult(is_valid=False, errors=["Error 1", "Error 2"], warnings=["Warning 1"])
 
         self.assertFalse(result.is_valid)
         self.assertEqual(len(result.errors), 2)

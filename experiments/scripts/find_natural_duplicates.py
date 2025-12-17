@@ -80,7 +80,7 @@ def find_natural_duplicates():
 
     print(f"\n{'-' * 70}")
     print(f"Total jokes loaded: {len(all_jokes):,}")
-    print(f"\nBreakdown by source:")
+    print("\nBreakdown by source:")
     for source, count in sorted(source_counts.items()):
         print(f"  {source}: {count:,}")
 
@@ -100,20 +100,18 @@ def find_natural_duplicates():
         normalized = normalize_text(text)
 
         # Store original joke data
-        normalized_groups[normalized].append({
-            "source": source,
-            "source_file": joke.get("_source_file", "unknown"),
-            "id": joke.get("id"),
-            "text": text,
-            "original": joke
-        })
+        normalized_groups[normalized].append(
+            {
+                "source": source,
+                "source_file": joke.get("_source_file", "unknown"),
+                "id": joke.get("id"),
+                "text": text,
+                "original": joke,
+            }
+        )
 
     # Find duplicates (groups with 2+ entries)
-    duplicates = {
-        text: jokes
-        for text, jokes in normalized_groups.items()
-        if len(jokes) > 1
-    }
+    duplicates = {text: jokes for text, jokes in normalized_groups.items() if len(jokes) > 1}
 
     print(f"Found {len(duplicates):,} duplicate groups")
 
@@ -124,14 +122,14 @@ def find_natural_duplicates():
     cross_source_dups = 0
     same_source_dups = 0
 
-    for text, jokes in duplicates.items():
+    for _text, jokes in duplicates.items():
         sources = {j["source"] for j in jokes}
         if len(sources) > 1:
             cross_source_dups += 1
         else:
             same_source_dups += 1
 
-    print(f"\nDuplicate breakdown:")
+    print("\nDuplicate breakdown:")
     print(f"  Cross-source duplicates: {cross_source_dups:,}")
     print(f"  Same-source duplicates: {same_source_dups:,}")
     print(f"  Total duplicate groups: {len(duplicates):,}")
@@ -142,48 +140,48 @@ def find_natural_duplicates():
 
     # Save top 100 duplicate groups as examples
     examples = []
-    for i, (text, jokes) in enumerate(sorted(duplicates.items(), key=lambda x: len(x[1]), reverse=True)[:100]):
-        examples.append({
-            "normalized_text": text,
-            "count": len(jokes),
-            "sources": list({j["source"] for j in jokes}),
-            "instances": [
-                {
-                    "source": j["source"],
-                    "id": j["id"],
-                    "text": j["text"][:200]  # Truncate for readability
-                }
-                for j in jokes
-            ]
-        })
+    for _i, (text, jokes) in enumerate(sorted(duplicates.items(), key=lambda x: len(x[1]), reverse=True)[:100]):
+        examples.append(
+            {
+                "normalized_text": text,
+                "count": len(jokes),
+                "sources": list({j["source"] for j in jokes}),
+                "instances": [
+                    {
+                        "source": j["source"],
+                        "id": j["id"],
+                        "text": j["text"][:200],  # Truncate for readability
+                    }
+                    for j in jokes
+                ],
+            }
+        )
 
     output_file = output_dir / "natural_duplicates.json"
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump({
-            "summary": {
-                "total_jokes": len(all_jokes),
-                "unique_jokes": len(normalized_groups) - len(duplicates),
-                "duplicate_groups": len(duplicates),
-                "cross_source_duplicates": cross_source_dups,
-                "same_source_duplicates": same_source_dups,
-                "source_counts": source_counts
+        json.dump(
+            {
+                "summary": {
+                    "total_jokes": len(all_jokes),
+                    "unique_jokes": len(normalized_groups) - len(duplicates),
+                    "duplicate_groups": len(duplicates),
+                    "cross_source_duplicates": cross_source_dups,
+                    "same_source_duplicates": same_source_dups,
+                    "source_counts": source_counts,
+                },
+                "examples": examples,
             },
-            "examples": examples
-        }, f, indent=2, ensure_ascii=False)
+            f,
+            indent=2,
+            ensure_ascii=False,
+        )
 
     print(f"Saved results to {output_file}")
 
     # Save full duplicate data
     full_output = output_dir / "natural_duplicates_full.json"
     full_data = {
-        normalized: [
-            {
-                "source": j["source"],
-                "id": j["id"],
-                "text": j["text"]
-            }
-            for j in jokes
-        ]
+        normalized: [{"source": j["source"], "id": j["id"], "text": j["text"]} for j in jokes]
         for normalized, jokes in duplicates.items()
     }
 
@@ -197,7 +195,7 @@ def find_natural_duplicates():
     print("Top 10 most duplicated jokes:")
     print(f"{'-' * 70}")
 
-    for i, (text, jokes) in enumerate(sorted(duplicates.items(), key=lambda x: len(x[1]), reverse=True)[:10], 1):
+    for i, (_text, jokes) in enumerate(sorted(duplicates.items(), key=lambda x: len(x[1]), reverse=True)[:10], 1):
         print(f"\n{i}. Found in {len(jokes)} places:")
         sources = ", ".join(sorted({j["source"] for j in jokes}))
         print(f"   Sources: {sources}")

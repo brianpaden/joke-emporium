@@ -74,7 +74,7 @@ def sample_real_jokes():
         "from_reddit": [],
         "from_stupidstuff": [],
         "from_wocka": [],
-        "random_sample": []
+        "random_sample": [],
     }
 
     # Sample from each source
@@ -99,7 +99,7 @@ def sample_real_jokes():
                 "body": joke.get("body", ""),
                 "category": joke.get("category", ""),
                 "score": joke.get("score"),
-                "rating": joke.get("rating")
+                "rating": joke.get("rating"),
             }
 
             # Categorize by length
@@ -154,11 +154,11 @@ def sample_real_jokes():
     # Create a compact version for quick testing
     compact_samples = {
         "diverse_sample": (
-            samples["short_jokes"][:5] +
-            samples["medium_jokes"][:5] +
-            samples["long_jokes"][:5] +
-            samples["qa_jokes"][:5] +
-            samples["one_liners"][:5]
+            samples["short_jokes"][:5]
+            + samples["medium_jokes"][:5]
+            + samples["long_jokes"][:5]
+            + samples["qa_jokes"][:5]
+            + samples["one_liners"][:5]
         )
     }
 

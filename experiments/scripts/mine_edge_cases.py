@@ -64,14 +64,14 @@ def categorize_joke(joke: dict, source: str) -> list[str]:
     # Emoji detection
     emoji_pattern = re.compile(
         "["
-        "\U0001F600-\U0001F64F"  # emoticons
-        "\U0001F300-\U0001F5FF"  # symbols & pictographs
-        "\U0001F680-\U0001F6FF"  # transport & map symbols
-        "\U0001F1E0-\U0001F1FF"  # flags
-        "\U00002702-\U000027B0"
-        "\U000024C2-\U0001F251"
+        "\U0001f600-\U0001f64f"  # emoticons
+        "\U0001f300-\U0001f5ff"  # symbols & pictographs
+        "\U0001f680-\U0001f6ff"  # transport & map symbols
+        "\U0001f1e0-\U0001f1ff"  # flags
+        "\U00002702-\U000027b0"
+        "\U000024c2-\U0001f251"
         "]+",
-        flags=re.UNICODE
+        flags=re.UNICODE,
     )
     if emoji_pattern.search(full_text):
         categories.append("emoji")
@@ -84,7 +84,7 @@ def categorize_joke(joke: dict, source: str) -> list[str]:
         categories.append("number_heavy")
 
     # Punctuation analysis
-    punct_chars = set('.,!?;:—..."\'-')
+    punct_chars = set(".,!?;:—...\"'-")
     punct_count = sum(1 for c in full_text if c in punct_chars)
     if punct_count > len(full_text) * 0.15:
         categories.append("punctuation_heavy")
@@ -94,7 +94,7 @@ def categorize_joke(joke: dict, source: str) -> list[str]:
         categories.append("ellipsis")
     if full_text.count("\n") > 5:
         categories.append("multiline")
-    if re.search(r'[A-Z]{3,}', full_text):
+    if re.search(r"[A-Z]{3,}", full_text):
         categories.append("shouting")
 
     # Code or technical content
@@ -102,7 +102,7 @@ def categorize_joke(joke: dict, source: str) -> list[str]:
         categories.append("code_like")
 
     # URLs or links
-    if re.search(r'https?://', full_text):
+    if re.search(r"https?://", full_text):
         categories.append("contains_url")
 
     return categories
@@ -157,14 +157,16 @@ def mine_edge_cases():
 
                     if len(edge_cases[category]) < 20:
                         text = get_joke_text(joke, source_name)
-                        edge_cases[category].append({
-                            "source": source_name,
-                            "id": joke.get("id"),
-                            "text": text,
-                            "length": len(text),
-                            "title": joke.get("title", ""),
-                            "body": joke.get("body", "")[:200] if joke.get("body") else ""
-                        })
+                        edge_cases[category].append(
+                            {
+                                "source": source_name,
+                                "id": joke.get("id"),
+                                "text": text,
+                                "length": len(text),
+                                "title": joke.get("title", ""),
+                                "body": joke.get("body", "")[:200] if joke.get("body") else "",
+                            }
+                        )
 
             print(f"  Processed {len(jokes):,} jokes")
 
@@ -187,13 +189,15 @@ def mine_edge_cases():
 
     output_file = output_dir / "edge_cases.json"
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump({
-            "summary": {
-                "total_categories": len(category_counts),
-                "category_counts": category_counts
+        json.dump(
+            {
+                "summary": {"total_categories": len(category_counts), "category_counts": category_counts},
+                "examples": edge_cases,
             },
-            "examples": edge_cases
-        }, f, indent=2, ensure_ascii=False)
+            f,
+            indent=2,
+            ensure_ascii=False,
+        )
 
     print(f"Saved edge cases to {output_file}")
 
@@ -229,7 +233,7 @@ def mine_edge_cases():
                 print(f"  Text: {display_text}")
             except UnicodeEncodeError:
                 # Fallback: replace non-ASCII with ?
-                safe_text = display_text.encode('ascii', errors='replace').decode('ascii')
+                safe_text = display_text.encode("ascii", errors="replace").decode("ascii")
                 print(f"  Text: {safe_text}")
 
     print(f"\n{'-' * 70}")
