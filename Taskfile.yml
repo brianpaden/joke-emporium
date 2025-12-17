@@ -18,22 +18,45 @@ tasks:
       - task --list
     silent: true
 
-  init:
+  update:
     desc: Initialize the development environment
+    generates:
+      - '{{.VENV_PATH}}'
     cmds:
-      - '{{.UV}} sync'
+      - '{{.UV}} sync --extra dev --dev --python {{.PYTHON_VERSION}}'
 
   install:
     desc: Install project dependencies
+    sources:
+      - 
+    cmds:
+      - task: install:git-lfs
+      - task: update
+      - task: install:claude-monitor
+
+  install:git-lfs:
+    desc: Install Git LFS (Large File Storage)
     cmds:
       - git lfs install
-      - task: init
+    sources:
+      - .git/hooks
+      - .git/lfs/*
+
+  install:claude-monitor:
+    desc: Install Claude Code Monitor tool
+    cmds:
       - uv tool install claude-monitor
+    generates:
+      - '{{.UV_TOOL_DIR}}/claude-monitor/Scripts/claude-monitor.exe'
+    vars:
+      UV_TOOL_DIR: uv tool dir
 
   upgrade:
     desc: Upgrade all dependencies to their latest versions
     cmds:
       - '{{.UV}} lock --upgrade'
+    generates:
+      - uv.lock
 
   lint:
     desc: Lint the codebase
@@ -43,7 +66,7 @@ tasks:
   monitor:claude:
     desc: Start claude code monitoring
     cmds:
-      - wt -d . claude-code-monitor.exe
+      - wt -d . uv run claude-code-monitor.exe
 
   test:
     desc: Run the test suite

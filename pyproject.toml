@@ -90,4 +90,4 @@ python_functions = ["test_*"]
 addopts = "-v --cov=joke_emporium --cov-report=term-missing"
 
 [project.scripts]
-joke-emporium = "joke_emporium.importers.cli:cli"
+joke-import = "joke_emporium.importers.cli:cli"
