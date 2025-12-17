@@ -265,6 +265,37 @@ def mark_duplicates_in_batch(
     return duplicates_found
 ```
 
+**IMPORTANT - Semantic Analysis Results (2025-12-17):**
+
+Following Sprint 3 experimental validation, we tested whether semantic embeddings (Word2Vec, BERT) would improve deduplication beyond hash-based matching. See [experiments/results/NORMALIZATION_VALIDATION.md](../experiments/results/NORMALIZATION_VALIDATION.md) for full details.
+
+**Key Findings:**
+- Measured 5.48% "semantic duplicate" rate using Sentence-BERT embeddings
+- **BUT** 85% of these are actually minor text variations, NOT true semantic differences
+- Enhanced normalization (article removal, stop words) provides **0% improvement**
+- These variations need Levenshtein distance, not embeddings
+
+**Recommendation for Sprint 3 MVP:**
+- ❌ **Skip** article/stop-word removal (adds complexity, provides 0% benefit)
+- ❌ **Skip** embeddings for deduplication (not worth 47x storage overhead)
+- ✅ **Use** baseline normalization as documented above (already achieves 68.5% recall)
+
+**Recommendation for Phase 2:**
+- ✅ **Add** Levenshtein fuzzy matching (90% threshold) as fallback
+  - Will catch 70-80% of "semantic" duplicates
+  - Much simpler than embeddings
+  - Much faster (2.7K vs 100-1K comp/sec)
+
+**Alternative use for embeddings (Phase 3+):**
+- Consider for user-facing features only (similarity search, recommendations)
+- Pre-compute and cache, NOT for real-time deduplication
+
+**Validation data:**
+- 5,000 jokes tested with Sentence-BERT (all-MiniLM-L6-v2)
+- 274 semantic duplicate pairs found (5.48% rate)
+- Enhanced normalization tested on all pairs: 0/274 caught (0% improvement)
+- Conclusion: Simple text-based fuzzy matching beats expensive embeddings
+
 ### 3. Production Database Schema
 
 **File:** `src/joke_emporium/db/models/production.py`
@@ -968,12 +999,51 @@ Already installed - no new dependencies required.
    - Current approach: Single transaction per batch
    - Future: Batch in chunks if needed
 
-## Future Enhancements (Sprint 4)
+## Future Enhancements (Phase 2+)
 
-1. **Advanced Deduplication**
-   - Fuzzy matching with Levenshtein distance
-   - Text fingerprinting/hashing
-   - ML-based similarity detection
+### Phase 2: Enhanced Deduplication (Post-Sprint 3)
+
+1. **Levenshtein Fuzzy Matching** (HIGH PRIORITY)
+   - Add fuzzy fallback for hash misses
+   - 90% similarity threshold for short jokes (<100 chars)
+   - 80-85% threshold for long jokes (>100 chars)
+   - **Expected impact:** Catch 70-80% of current "semantic duplicates"
+   - **Performance:** 2.7K comparisons/sec (acceptable for fallback)
+   - **Validated:** Based on 208k joke analysis + semantic testing
+
+2. **Number Normalization** (MEDIUM PRIORITY)
+   - Map "three" ↔ "3" for common numbers (0-12)
+   - Affects 17% of jokes
+   - Requires careful testing to avoid false positives ("won" → "1", "for" → "4")
+
+3. **Contraction Handling** (LOW PRIORITY)
+   - Consider expanding contractions ("you're" → "you are") for fuzzy matching only
+   - Keep original in database
+   - Test impact on recall before implementing
+
+### Phase 3+: User Features
+
+1. **Semantic Search** (Using Embeddings)
+   - "Find jokes like this one" feature
+   - Pre-compute embeddings for all production jokes
+   - Use FAISS or Annoy for fast similarity search
+   - Storage: 300MB for 200k jokes (acceptable for user features)
+
+2. **Content Recommendations**
+   - "If you liked this, you'll like..." suggestions
+   - Based on pre-computed embeddings
+   - Not for real-time deduplication
+
+3. **Topic Clustering**
+   - Automatic categorization by theme
+   - Batch process for performance
+
+### Phase 4: Advanced Features
+
+1. **ML-Based Quality Scoring** (NOT for deduplication)
+   - Automated quality assessment
+   - Source reputation tracking
+   - Auto-approval thresholds
 
 2. **Web UI for Review**
    - Interactive joke review interface
@@ -1005,11 +1075,19 @@ Already installed - no new dependencies required.
 
 ## Notes
 
-- Keep deduplication simple for now - experimentation needed with real data
+### Deduplication Strategy (Validated)
+- ✅ **Baseline normalization validated** on 208k real jokes (68.5% recall on variations)
+- ✅ **Enhanced normalization tested** - provides 0% improvement, skip for MVP
+- ✅ **Semantic embeddings evaluated** - not cost-effective for deduplication (use for user features only)
+- ✅ **Phase 2 roadmap defined** - Levenshtein fuzzy matching as next step
+- See [experiments/results/NORMALIZATION_VALIDATION.md](../experiments/results/NORMALIZATION_VALIDATION.md) for full analysis
+
+### Implementation Guidelines
 - Focus on getting the workflow working end-to-end
 - Transactional merges are critical for data integrity
 - Track provenance for debugging and rollback capability
 - Don't delete staging data after merge (useful for debugging)
+- Use the validated normalization function as-is (don't add article removal or stop words)
 
 ---
 
@@ -1040,4 +1118,47 @@ uv run python -m joke_emporium.importers.cli approve-batch <import-id>
 uv run python -m joke_emporium.importers.cli merge <import-id> --dry-run
 ```
 
-The foundation from Sprint 1 & 2 is solid. Sprint 3 completes the core workflow! 🚀
+The foundation from Sprint 1 & 2 is solid. Sprint 3 completes the core workflow!
+
+---
+
+## Experimental Validation References
+
+The deduplication strategy for Sprint 3 is backed by comprehensive experimental analysis:
+
+### Primary Validation Documents
+1. **[NORMALIZATION_VALIDATION.md](../experiments/results/NORMALIZATION_VALIDATION.md)**
+   - Baseline normalization: 100% recall on real duplicates, 62.3% on variations
+   - Enhanced normalization: 0% improvement (article removal, stop words tested)
+   - Semantic embeddings: Not cost-effective for deduplication
+   - Recommendation: Use baseline for MVP, add Levenshtein in Phase 2
+
+2. **[EXPERIMENT_RESULTS.md](../experiments/output/EXPERIMENT_RESULTS.md)**
+   - Analysis of 208,345 real jokes
+   - 2,590 duplicate groups found
+   - Performance benchmarks for different approaches
+
+3. **[NORMALIZATION_STRATEGIES.md](../experiments/NORMALIZATION_STRATEGIES.md)**
+   - Deep dive into normalization techniques
+   - Unicode, case, whitespace, punctuation handling
+   - Performance analysis and trade-offs
+
+### Experimental Scripts
+- `experiments/scripts/test_normalization.py` - Baseline validation (100% recall on real dups)
+- `experiments/scripts/measure_semantic_duplicates.py` - Embedding analysis (5.48% semantic rate)
+- `experiments/scripts/test_enhanced_normalization.py` - Enhanced norm testing (0% improvement)
+- `experiments/scripts/benchmark_similarity.py` - Performance comparisons
+
+### Key Experimental Findings
+- **Hash-based exact match:** 3.6M comparisons/sec, 100% recall on duplicates
+- **Levenshtein 90% threshold:** 2.7K comparisons/sec, 71.2% recall on variations
+- **Sentence-BERT embeddings:** 100-1K comparisons/sec, 47x storage overhead
+- **Conclusion:** Simple text-based fuzzy matching beats expensive embeddings
+
+### Data Sources
+- 208,345 jokes from taivop/joke-dataset
+- reddit_jokes: 194,553 jokes
+- stupidstuff: 3,773 jokes
+- wocka: 10,019 jokes
+
+All experimental findings have been validated and incorporated into the Sprint 3 design.

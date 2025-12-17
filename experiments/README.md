@@ -24,7 +24,9 @@ experiments/
 ### Deduplication Testing
 
 - ✅ **`benchmark_similarity.py`** - Benchmark different similarity metrics
-- ⏳ **`test_normalization.py`** - Test different text normalization approaches (future)
+- ✅ **`test_normalization.py`** - Validate normalization strategies against real data
+- ✅ **`measure_semantic_duplicates.py`** - Measure semantic duplicate rate to assess embedding value
+- 🆕 **`test_enhanced_normalization.py`** - Test enhanced normalization (articles, stop words) on semantic duplicates
 - ⏳ **`analyze_performance.py`** - Performance analysis on varying dataset sizes (future)
 
 ## Quick Start
@@ -35,7 +37,7 @@ experiments/
 uv run python experiments/scripts/find_natural_duplicates.py
 ```
 
-Output: `experiments/output/natural_duplicates.json`
+**Output:** `experiments/output/natural_duplicates.json` - All duplicate groups found in 208k jokes
 
 ### 2. Mine Edge Cases
 
@@ -43,7 +45,7 @@ Output: `experiments/output/natural_duplicates.json`
 uv run python experiments/scripts/mine_edge_cases.py
 ```
 
-Output: `experiments/output/edge_cases.json`
+**Output:** `experiments/output/edge_cases.json` - Edge cases by category
 
 ### 3. Create Test Fixtures
 
@@ -51,7 +53,69 @@ Output: `experiments/output/edge_cases.json`
 uv run python experiments/scripts/sample_real_jokes.py
 ```
 
-Output: `tests/fixtures/real_joke_samples.json`
+**Output:** `tests/fixtures/real_joke_samples.json` - Diverse samples for testing
+
+### 4. Benchmark Similarity Metrics
+
+```bash
+uv run python experiments/scripts/benchmark_similarity.py
+```
+
+**Output:** `experiments/output/benchmark_*.json` - Performance metrics for each approach
+
+### 5. Test Normalization Strategies
+
+```bash
+uv run python experiments/scripts/test_normalization.py
+```
+
+Validates the data-driven normalization approach against real data.
+
+**Output:** `experiments/output/normalization_test_results.json` - Validation results
+
+### 6. Measure Semantic Duplicate Rate (Optional)
+
+```bash
+# Install dependencies first (downloads ~500MB model on first run)
+uv pip install sentence-transformers scikit-learn tqdm
+
+# Run experiment (takes 1-2 minutes for 2k sample)
+uv run python experiments/scripts/measure_semantic_duplicates.py
+```
+
+Measures how many "semantic-only" duplicates exist - jokes that are similar in meaning but different in text. This determines whether semantic embeddings (BERT, Word2Vec) would add value beyond hash-based deduplication.
+
+**Performance:**
+- 2,000 jokes = ~2M comparisons (~1-2 minutes)
+- 5,000 jokes = ~12.5M comparisons (~5-10 minutes)
+- 10,000 jokes = ~50M comparisons (~20-30 minutes)
+
+**Output:** `experiments/output/semantic_duplicate_analysis.json` - Rate and examples
+
+**Decision criteria:**
+- If <0.5%: Embeddings not worth the cost (stick with hash + Levenshtein)
+- If 0.5-1%: Consider for Phase 3 (marginal benefit)
+- If >1%: Should prioritize for Phase 2/3 (significant value)
+
+**Note:** This experiment requires additional dependencies and is optional for Sprint 3.
+
+### 7. Test Enhanced Normalization
+
+```bash
+# Run after measuring semantic duplicates (step 6)
+uv run python experiments/scripts/test_enhanced_normalization.py
+```
+
+Tests whether enhanced normalization (article removal, stop word filtering) can catch the "semantic duplicates" found by embeddings using simple text-based normalization instead of expensive embeddings.
+
+**Input:** `experiments/output/semantic_duplicate_analysis.json` (from step 6)
+
+**Output:** `experiments/output/enhanced_normalization_test.json` - Improvement metrics
+
+**Expected findings:**
+- Enhanced normalization catches 15-30% more duplicates than baseline
+- Remaining duplicates are true retellings needing Levenshtein
+- Validates whether to implement enhanced normalization in Sprint 3
 
 ## Data Sources
 
