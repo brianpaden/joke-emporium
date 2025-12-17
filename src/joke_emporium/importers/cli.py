@@ -13,7 +13,6 @@ from joke_emporium.db.staging import (
     delete_import_batch,
     get_all_import_batches,
     get_import_batch,
-    get_staging_jokes,
     get_staging_jokes_by_status,
     get_staging_session,
     init_staging_db,
@@ -161,72 +160,6 @@ def list_imports(status: str | None, staging_db: str | None) -> None:
 
     except Exception as e:
         click.echo(f"Error listing imports: {e}", err=True)
-        sys.exit(1)
-
-
-@cli.command("inspect")
-@click.argument("import_id")
-@click.option("--status", type=click.Choice(["pending", "approved", "rejected"]), help="Filter by status")
-@click.option("--limit", type=int, default=10, help="Number of jokes to show")
-@click.option(
-    "--staging-db",
-    type=click.Path(),
-    default=None,
-    help="Path to staging database",
-)
-def inspect(import_id: str, status: str | None, limit: int, staging_db: str | None) -> None:
-    """Inspect staging jokes for an import batch.
-
-    IMPORT_ID: UUID of the import batch to inspect
-
-    Examples:
-        # Inspect first 10 jokes
-        python -m joke_emporium.importers.cli inspect <import_id>
-
-        # Inspect only pending jokes
-        python -m joke_emporium.importers.cli inspect <import_id> --status pending
-
-        # Show more jokes
-        python -m joke_emporium.importers.cli inspect <import_id> --limit 50
-    """
-    try:
-        db_url = f"sqlite:///{staging_db}" if staging_db else None
-        init_staging_db(db_url)
-
-        with next(get_staging_session()) as session:
-            # Get import batch info
-            batch = get_import_batch(session, import_id)
-            if not batch:
-                click.echo(f"Import batch not found: {import_id}", err=True)
-                sys.exit(1)
-
-            click.echo(f"\nImport Batch: {batch.import_id}")
-            click.echo(f"Source: {batch.source}")
-            click.echo(f"Imported: {batch.imported_at}")
-            click.echo(f"Status: {batch.validation_status}")
-            click.echo(f"Total: {batch.total_records}, Success: {batch.successful}, Failed: {batch.failed}")
-
-            # Get staging jokes
-            jokes = get_staging_jokes(session, import_id=import_id, validation_status=status, limit=limit)
-
-            if not jokes:
-                click.echo("\nNo staging jokes found with the specified filters.")
-                return
-
-            click.echo(f"\nShowing {len(jokes)} joke(s):\n")
-
-            for i, joke in enumerate(jokes, 1):
-                click.echo(f"{i}. ID: {joke.id} | UUID: {joke.joke_uuid}")
-                click.echo(f"   Status: {joke.validation_status}")
-                click.echo(f"   Preview: {joke.text_preview}")
-                if joke.validation_notes:
-                    click.echo(f"   Notes: {joke.validation_notes}")
-                if joke.duplicate_of:
-                    click.echo(f"   Duplicate of: {joke.duplicate_of}")
-                click.echo()
-
-    except Exception as e:
-        click.echo(f"Error inspecting import: {e}", err=True)
         sys.exit(1)
 
 
@@ -450,57 +383,84 @@ def approve_batch_cmd(import_id: str, min_score: float | None, staging_db: str |
 
 
 @cli.command("review")
-@click.argument("import_id")
+@click.argument("import_id", required=False)
 @click.option(
     "--status",
-    type=click.Choice(["pending", "approved", "rejected", "under_review", "duplicate", "all"]),
+    type=click.Choice(["pending", "approved", "rejected", "under_review", "duplicate", "merged", "all"]),
     default="all",
     help="Filter by review status",
 )
 @click.option("--limit", type=int, default=20, help="Max jokes to show")
-@click.option("--verbose", is_flag=True, help="Show full joke details")
+@click.option("-v", "--verbose", count=True, help="Increase verbosity (use -v, -vv, or -vvv for more detail)")
+@click.option("--max-chars", type=int, default=None, help="Max characters to show for joke text (default: 100, -v: 300, -vv: 500, -vvv: unlimited)")
 @click.option(
     "--staging-db",
     type=click.Path(),
     default=None,
     help="Path to staging database",
 )
-def review_cmd(import_id: str, status: str, limit: int, verbose: bool, staging_db: str | None) -> None:
-    """Review jokes in an import batch before merging.
+def review_cmd(import_id: str | None, status: str, limit: int, verbose: int, max_chars: int | None, staging_db: str | None) -> None:
+    """Review jokes before merging to production.
 
-    IMPORT_ID: UUID of the import batch
+    IMPORT_ID: Optional UUID of the import batch to filter by
+
+    Verbosity levels:
+        (default): Shows ID, status, and 100 chars of text
+        -v: Adds tags, scores, and 300 chars of text
+        -vv: Adds maturity, structure, review notes, and 500 chars of text
+        -vvv: Shows all fields including engagement, GTVH, and full text
 
     Examples:
-        # Review pending jokes
+        # Review all pending jokes across all imports
+        python -m joke_emporium.importers.cli review --status pending
+
+        # Review approved jokes from specific import with basic details
+        python -m joke_emporium.importers.cli review <import_id> --status approved -v
+
+        # Show full details with all metadata
+        python -m joke_emporium.importers.cli review <import_id> -vvv
+
+        # Review jokes from specific import
         python -m joke_emporium.importers.cli review <import_id>
-
-        # Review approved jokes
-        python -m joke_emporium.importers.cli review <import_id> --status approved
-
-        # Show full details
-        python -m joke_emporium.importers.cli review <import_id> --verbose
     """
     try:
         db_url = f"sqlite:///{staging_db}" if staging_db else None
         init_staging_db(db_url)
 
         with next(get_staging_session()) as session:
-            # Get import batch
-            batch = get_import_batch(session, import_id)
-            if not batch:
-                click.echo(f"Import batch not found: {import_id}", err=True)
-                sys.exit(1)
+            # Get import batch ID if specified
+            batch_id = None
+            if import_id:
+                batch = get_import_batch(session, import_id)
+                if not batch:
+                    click.echo(f"Import batch not found: {import_id}", err=True)
+                    sys.exit(1)
+                batch_id = batch.id
 
             # Get jokes
             jokes = get_staging_jokes_by_status(
-                session, batch.id, status=None if status == "all" else status, limit=limit
+                session, import_batch_id=batch_id, status=None if status == "all" else status, limit=limit
             )
 
             if not jokes:
                 click.echo(f"No jokes found with status: {status}")
                 return
 
-            click.echo(f"\nReviewing {len(jokes)} joke(s) from import {import_id}")
+            # Determine max characters for text display based on verbosity
+            if max_chars is None:
+                if verbose == 0:
+                    max_chars = 100
+                elif verbose == 1:
+                    max_chars = 300
+                elif verbose == 2:
+                    max_chars = 500
+                else:  # verbose >= 3
+                    max_chars = 999999  # Effectively unlimited
+
+            if import_id:
+                click.echo(f"\nReviewing {len(jokes)} joke(s) from import {import_id}")
+            else:
+                click.echo(f"\nReviewing {len(jokes)} joke(s) across all imports")
             click.echo("=" * 80)
 
             for staging_joke in jokes:
@@ -510,37 +470,99 @@ def review_cmd(import_id: str, status: str, limit: int, verbose: bool, staging_d
                 content_data = json.loads(staging_joke.content_json)
                 joke_text = " ".join(elem.get("text", "") for elem in content_data)
 
-                # Show joke ID and status
+                # Show joke ID and status (always shown)
                 status_icon = {
-                    "pending": "⏸",
-                    "approved": "✓",
-                    "rejected": "✗",
-                    "under_review": "⚠",
-                    "duplicate": "≈",
-                    "merged": "→",
-                }.get(staging_joke.review_status, "?")
+                    "pending": "[ ]",
+                    "approved": "[+]",
+                    "rejected": "[X]",
+                    "under_review": "[?]",
+                    "duplicate": "[=]",
+                    "merged": "[>]",
+                }.get(staging_joke.review_status, "[?]")
 
                 click.echo(f"\n{status_icon} ID: {staging_joke.id} | UUID: {staging_joke.joke_uuid}")
                 click.echo(f"   Status: {staging_joke.review_status}")
 
-                # Show joke text
-                preview = joke_text[:100] + "..." if len(joke_text) > 100 else joke_text
+                # Show joke text with configurable max length (always shown)
+                preview = joke_text[:max_chars] + "..." if len(joke_text) > max_chars else joke_text
                 click.echo(f"   Text: {preview}")
 
-                # Show key metadata
-                tags_data = json.loads(staging_joke.tags_json) if staging_joke.tags_json else []
-                if tags_data:
-                    click.echo(f"   Tags: {', '.join(tags_data[:5])}")
-                if staging_joke.weighted_avg_funniness:
-                    click.echo(f"   Avg Score: {staging_joke.weighted_avg_funniness:.1f}")
+                # Level 1+ (-v): Show tags and scores
+                if verbose >= 1:
+                    tags_data = json.loads(staging_joke.tags_json) if staging_joke.tags_json else []
+                    if tags_data:
+                        tag_preview = tags_data[:5] if verbose < 3 else tags_data
+                        click.echo(f"   Tags: {', '.join(tag_preview)}")
+                    if staging_joke.weighted_avg_funniness:
+                        click.echo(f"   Avg Funniness: {staging_joke.weighted_avg_funniness:.1f}")
+                    if staging_joke.weighted_avg_quality:
+                        click.echo(f"   Avg Quality: {staging_joke.weighted_avg_quality:.1f}")
+                    if staging_joke.total_ratings_count:
+                        click.echo(f"   Total Ratings: {staging_joke.total_ratings_count}")
 
-                # Show verbose details
-                if verbose:
+                # Level 2+ (-vv): Show maturity, structure, review notes
+                if verbose >= 2:
                     click.echo(f"   Maturity: {staging_joke.maturity_rating}")
                     if staging_joke.structure:
                         click.echo(f"   Structure: {staging_joke.structure}")
+                    if staging_joke.cognitive_type:
+                        click.echo(f"   Cognitive Type: {staging_joke.cognitive_type}")
                     if staging_joke.review_notes:
-                        click.echo(f"   Notes: {staging_joke.review_notes}")
+                        click.echo(f"   Review Notes: {staging_joke.review_notes}")
+                    if staging_joke.reviewed_by:
+                        click.echo(f"   Reviewed By: {staging_joke.reviewed_by}")
+                    if staging_joke.reviewed_at:
+                        click.echo(f"   Reviewed At: {staging_joke.reviewed_at}")
+
+                # Level 3+ (-vvv): Show everything including engagement, GTVH, metadata
+                if verbose >= 3:
+                    click.echo(f"   Language: {staging_joke.language}")
+                    if staging_joke.source_platform:
+                        click.echo(f"   Source Platform: {staging_joke.source_platform}")
+                    if staging_joke.source_url:
+                        click.echo(f"   Source URL: {staging_joke.source_url}")
+
+                    # Dates
+                    if staging_joke.created_date:
+                        click.echo(f"   Created: {staging_joke.created_date}")
+                    if staging_joke.scraped_date:
+                        click.echo(f"   Scraped: {staging_joke.scraped_date}")
+                    click.echo(f"   Added: {staging_joke.added_date}")
+                    click.echo(f"   Modified: {staging_joke.last_modified}")
+
+                    # Flags
+                    flags_data = json.loads(staging_joke.flags_json) if staging_joke.flags_json else {}
+                    if flags_data:
+                        click.echo(f"   Flags: {flags_data}")
+
+                    # Engagement
+                    if staging_joke.engagement_json:
+                        engagement_data = json.loads(staging_joke.engagement_json)
+                        click.echo(f"   Engagement: {engagement_data}")
+
+                    # GTVH
+                    if staging_joke.gtvh_json:
+                        gtvh_data = json.loads(staging_joke.gtvh_json)
+                        click.echo(f"   GTVH: {gtvh_data}")
+
+                    # Metadata
+                    if staging_joke.metadata_json:
+                        metadata = json.loads(staging_joke.metadata_json)
+                        click.echo(f"   Metadata: {metadata}")
+
+                    # Duplicate info
+                    if staging_joke.duplicate_of_uuid:
+                        click.echo(f"   Duplicate Of: {staging_joke.duplicate_of_uuid}")
+                        if staging_joke.duplicate_similarity:
+                            click.echo(f"   Similarity: {staging_joke.duplicate_similarity:.2%}")
+
+                    # Merge info
+                    if staging_joke.merged_to_uuid:
+                        click.echo(f"   Merged To: {staging_joke.merged_to_uuid}")
+                        click.echo(f"   Merged At: {staging_joke.merged_at}")
+
+                    click.echo(f"   Verified: {staging_joke.verified}")
+                    click.echo(f"   Import Batch ID: {staging_joke.import_batch_id}")
 
                 click.echo("   " + "-" * 76)
 
@@ -607,9 +629,9 @@ def merge(import_id: str, dry_run: bool, staging_db: str | None, prod_db: str | 
                     )
 
                     if dry_run:
-                        click.echo("\n🔍 DRY RUN - No changes committed\n")
+                        click.echo("\n[DRY RUN] - No changes committed\n")
                     else:
-                        click.echo("\n✓ MERGE COMPLETE\n")
+                        click.echo("\n[MERGE COMPLETE]\n")
 
                     click.echo("=" * 60)
                     click.echo(f"Total jokes reviewed: {stats['total']}")
@@ -619,7 +641,7 @@ def merge(import_id: str, dry_run: bool, staging_db: str | None, prod_db: str | 
                     click.echo("=" * 60)
 
                 except Exception as e:
-                    click.echo(f"\n✗ Merge failed: {e}")
+                    click.echo(f"\n[FAILED] Merge failed: {e}")
                     if not dry_run:
                         click.echo("All changes rolled back (transaction failed)")
                     raise

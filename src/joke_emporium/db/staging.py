@@ -7,7 +7,7 @@ from pathlib import Path
 from sqlmodel import Session, SQLModel, create_engine, select
 
 from joke_emporium.db.models.staging import ImportBatchDB, ReviewStatus, StagingJokeDB
-from joke_emporium.importers.models import ImportMetadata, ValidationStatus
+from joke_emporium.importers.models import ImportMetadata
 from joke_emporium.models.joke import Joke
 
 # Default staging database path
@@ -215,9 +215,10 @@ def approve_staging_joke(session: Session, staging_id: int, notes: str | None = 
     if not staging_joke:
         return False
 
-    staging_joke.validation_status = ValidationStatus.APPROVED.value
+    staging_joke.review_status = ReviewStatus.APPROVED
+    staging_joke.reviewed_at = datetime.now(UTC)
     if notes:
-        staging_joke.validation_notes = notes
+        staging_joke.review_notes = notes
 
     session.add(staging_joke)
     session.commit()
@@ -242,8 +243,9 @@ def reject_staging_joke(session: Session, staging_id: int, reason: str) -> bool:
     if not staging_joke:
         return False
 
-    staging_joke.validation_status = ValidationStatus.REJECTED.value
-    staging_joke.validation_notes = reason
+    staging_joke.review_status = ReviewStatus.REJECTED
+    staging_joke.reviewed_at = datetime.now(UTC)
+    staging_joke.review_notes = reason
 
     session.add(staging_joke)
     session.commit()
@@ -268,9 +270,10 @@ def mark_duplicate(session: Session, staging_id: int, duplicate_of_uuid: str) ->
     if not staging_joke:
         return False
 
-    staging_joke.duplicate_of = duplicate_of_uuid
-    staging_joke.validation_status = ValidationStatus.REJECTED.value
-    staging_joke.validation_notes = f"Duplicate of joke {duplicate_of_uuid}"
+    staging_joke.duplicate_of_uuid = duplicate_of_uuid
+    staging_joke.review_status = ReviewStatus.DUPLICATE
+    staging_joke.reviewed_at = datetime.now(UTC)
+    staging_joke.review_notes = f"Duplicate of joke {duplicate_of_uuid}"
 
     session.add(staging_joke)
     session.commit()
@@ -392,20 +395,23 @@ def approve_batch_by_quality(session: Session, import_id: str, min_score: float 
 
 
 def get_staging_jokes_by_status(
-    session: Session, import_batch_id: int, status: str | None = None, limit: int | None = None
+    session: Session, import_batch_id: int | None = None, status: str | None = None, limit: int | None = None
 ) -> list[StagingJokeDB]:
     """Get staging jokes filtered by review status.
 
     Args:
         session: Staging database session
-        import_batch_id: Import batch ID
+        import_batch_id: Optional import batch ID filter
         status: Optional review status filter
         limit: Maximum number to return
 
     Returns:
         List of StagingJokeDB instances
     """
-    query = select(StagingJokeDB).where(StagingJokeDB.import_batch_id == import_batch_id)
+    query = select(StagingJokeDB)
+
+    if import_batch_id is not None:
+        query = query.where(StagingJokeDB.import_batch_id == import_batch_id)
 
     if status:
         query = query.where(StagingJokeDB.review_status == status)

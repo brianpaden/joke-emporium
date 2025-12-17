@@ -45,9 +45,8 @@ def merge_approved_jokes(
 
     for staging_joke in approved_jokes:
         try:
-            # Parse joke from JSON
-
-            joke = Joke.model_validate_json(staging_joke.content_json)
+            # Convert staging joke to Pydantic Joke model
+            joke = staging_joke.to_pydantic()
 
             # Check for duplicates in production
             is_duplicate, duplicate_uuid = check_duplicate_in_production(production_session, joke)

@@ -201,3 +201,81 @@ class StagingJokeDB(SQLModel, table=True):
         )
 
         return staging_joke
+
+    def to_pydantic(self) -> "Joke":
+        """Convert staging joke back to Pydantic Joke model.
+
+        Returns:
+            Joke instance
+        """
+        import json
+
+        from joke_emporium.models.content import JokeElement
+        from joke_emporium.models.enums import Category, LinguisticMechanism, MaturityRating, SourcePlatform
+        from joke_emporium.models.flags import ContentFlags
+        from joke_emporium.models.gtvh import GTVHAnnotation
+        from joke_emporium.models.joke import Joke
+        from joke_emporium.models.metadata import Engagement, JokeMetadata, Source
+
+        # Deserialize content
+        content_data = json.loads(self.content_json)
+        content = [JokeElement(**elem) for elem in content_data]
+
+        # Deserialize tags
+        tags = json.loads(self.tags_json) if self.tags_json else []
+
+        # Deserialize flags
+        flags_data = json.loads(self.flags_json) if self.flags_json else {}
+        flags = ContentFlags(**flags_data)
+
+        # Deserialize source
+        source = None
+        if self.source_platform:
+            source = Source(
+                platform=SourcePlatform(self.source_platform),
+                url=self.source_url,
+                scraped_date=self.scraped_date,
+            )
+
+        # Deserialize engagement
+        engagement = None
+        if self.engagement_json:
+            engagement_data = json.loads(self.engagement_json)
+            engagement = Engagement(**engagement_data)
+
+        # Deserialize GTVH
+        gtvh = None
+        if self.gtvh_json:
+            gtvh_data = json.loads(self.gtvh_json)
+            gtvh = GTVHAnnotation(**gtvh_data)
+
+        # Create metadata
+        metadata = JokeMetadata(
+            language=self.language,
+            authors=None,  # Staging doesn't store author relationships
+            source=source,
+            engagement=engagement,
+            created_date=self.created_date,
+            added_date=self.added_date,
+            last_modified=self.last_modified,
+            verified=self.verified,
+        )
+
+        # Create Joke
+        joke = Joke(
+            id=self.joke_uuid,
+            version=self.version,
+            content=content,
+            categories=[],  # Staging doesn't store category relationships
+            structure=self.structure,
+            mechanisms=[],  # Staging doesn't store mechanism relationships
+            maturity_rating=MaturityRating(self.maturity_rating) if self.maturity_rating else MaturityRating.G,
+            cognitive_type=self.cognitive_type,
+            tags=tags,
+            flags=flags,
+            ratings=[],  # Staging doesn't store rating relationships
+            metadata=metadata,
+            gtvh=gtvh,
+        )
+
+        return joke
