@@ -6,7 +6,7 @@ from pathlib import Path
 
 from sqlmodel import Session, SQLModel, create_engine, select
 
-from joke_emporium.db.models.staging import ImportBatchDB, StagingJokeDB
+from joke_emporium.db.models.staging import ImportBatchDB, ReviewStatus, StagingJokeDB
 from joke_emporium.importers.models import ImportMetadata, ValidationStatus
 from joke_emporium.models.joke import Joke
 
@@ -321,3 +321,112 @@ def delete_import_batch(session: Session, import_id: str) -> bool:
     session.commit()
 
     return True
+
+
+def update_review_status(
+    session: Session,
+    staging_id: int,
+    status: ReviewStatus,
+    notes: str | None = None,
+    reviewed_by: str | None = None
+) -> bool:
+    """Update review status of a staging joke.
+
+    Args:
+        session: Staging database session
+        staging_id: ID of staging joke
+        status: New review status
+        notes: Optional review notes
+        reviewed_by: Optional user identifier
+
+    Returns:
+        True if updated, False if not found
+    """
+    statement = select(StagingJokeDB).where(StagingJokeDB.id == staging_id)
+    staging_joke = session.exec(statement).first()
+
+    if not staging_joke:
+        return False
+
+    staging_joke.review_status = status
+    if notes:
+        staging_joke.review_notes = notes
+    if reviewed_by:
+        staging_joke.reviewed_by = reviewed_by
+    staging_joke.reviewed_at = datetime.now(timezone.utc)
+
+    session.add(staging_joke)
+    session.commit()
+
+    return True
+
+
+def approve_batch_by_quality(
+    session: Session,
+    import_id: str,
+    min_score: float | None = None
+) -> int:
+    """Approve jokes in a batch based on quality score.
+
+    Args:
+        session: Staging database session
+        import_id: Import batch ID
+        min_score: Minimum weighted avg funniness score
+
+    Returns:
+        Number of jokes approved
+    """
+    # Get import batch
+    import_batch = get_import_batch(session, import_id)
+    if not import_batch:
+        return 0
+
+    # Query pending jokes in batch
+    query = select(StagingJokeDB).where(
+        StagingJokeDB.import_batch_id == import_batch.id,
+        StagingJokeDB.review_status == ReviewStatus.PENDING
+    )
+
+    if min_score is not None:
+        query = query.where(StagingJokeDB.weighted_avg_funniness >= min_score)
+
+    staging_jokes = session.exec(query).all()
+
+    # Approve each joke
+    count = 0
+    for staging_joke in staging_jokes:
+        staging_joke.review_status = ReviewStatus.APPROVED
+        staging_joke.reviewed_at = datetime.now(timezone.utc)
+        session.add(staging_joke)
+        count += 1
+
+    session.commit()
+    return count
+
+
+def get_staging_jokes_by_status(
+    session: Session,
+    import_batch_id: int,
+    status: str | None = None,
+    limit: int | None = None
+) -> list[StagingJokeDB]:
+    """Get staging jokes filtered by review status.
+
+    Args:
+        session: Staging database session
+        import_batch_id: Import batch ID
+        status: Optional review status filter
+        limit: Maximum number to return
+
+    Returns:
+        List of StagingJokeDB instances
+    """
+    query = select(StagingJokeDB).where(StagingJokeDB.import_batch_id == import_batch_id)
+
+    if status:
+        query = query.where(StagingJokeDB.review_status == status)
+
+    if limit:
+        query = query.limit(limit)
+
+    return list(session.exec(query).all())

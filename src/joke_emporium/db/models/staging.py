@@ -1,10 +1,21 @@
 """Staging database models for import validation."""
 
 from datetime import datetime
+from enum import Enum
 
 from sqlmodel import Field, Relationship, SQLModel
 
 from joke_emporium.db.models.joke import JokeDB
+
+
+class ReviewStatus(str, Enum):
+    """Status of joke review for merge."""
+    PENDING = "pending"           # Not yet reviewed
+    APPROVED = "approved"         # Ready to merge
+    REJECTED = "rejected"         # Don't merge
+    UNDER_REVIEW = "under_review" # Needs manual review
+    DUPLICATE = "duplicate"       # Duplicate of existing joke
+    MERGED = "merged"             # Already merged to production
 
 
 class ImportBatchDB(SQLModel, table=True):
@@ -109,6 +120,22 @@ class StagingJokeDB(SQLModel, table=True):
     duplicate_of: str | None = Field(
         default=None, max_length=36, description="UUID of duplicate joke if detected"
     )
+
+    # Review tracking (staging-specific)
+    review_status: str = Field(default=ReviewStatus.PENDING, max_length=20, index=True,
+                               description="Review status for merge")
+    review_notes: str | None = Field(default=None, description="Review notes or reason")
+    reviewed_by: str | None = Field(default=None, max_length=100, description="User who reviewed")
+    reviewed_at: datetime | None = Field(default=None, description="When reviewed")
+
+    # Duplicate tracking (staging-specific)
+    duplicate_of_uuid: str | None = Field(default=None, max_length=36, index=True,
+                                          description="UUID of duplicate joke if found")
+    duplicate_similarity: float | None = Field(default=None, description="Similarity score (0-1)")
+
+    # Merge tracking (staging-specific)
+    merged_to_uuid: str | None = Field(default=None, max_length=36, description="UUID in production")
+    merged_at: datetime | None = Field(default=None, description="When merged to production")
 
     # Raw data preservation (staging-specific)
     original_data_json: str = Field(description="Original source data as JSON")

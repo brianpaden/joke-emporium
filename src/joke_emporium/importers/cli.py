@@ -7,15 +7,20 @@ from pathlib import Path
 import click
 
 from joke_emporium.db.staging import (
+    approve_batch_by_quality,
     approve_staging_joke,
     delete_import_batch,
     get_all_import_batches,
     get_import_batch,
     get_staging_jokes,
+    get_staging_jokes_by_status,
     get_staging_session,
     init_staging_db,
     reject_staging_joke,
+    update_review_status,
 )
+from joke_emporium.db.models.staging import ReviewStatus
+from joke_emporium.models.joke import Joke
 
 # Configure logging
 logging.basicConfig(
@@ -384,9 +389,183 @@ def reset(yes: bool, staging_db: str | None) -> None:
         sys.exit(1)
 
 
+@cli.command("flag")
+@click.argument("staging_id", type=int)
+@click.option("--notes", default=None, help="Review notes")
+@click.option(
+    "--staging-db",
+    type=click.Path(),
+    default=None,
+    help="Path to staging database",
+)
+def flag(staging_id: int, notes: str | None, staging_db: str | None) -> None:
+    """Flag a staging joke for manual review.
+
+    STAGING_ID: Database ID of the staging joke
+
+    Example:
+        python -m joke_emporium.importers.cli flag 123 --notes "Check category"
+    """
+    try:
+        db_url = f"sqlite:///{staging_db}" if staging_db else None
+        init_staging_db(db_url)
+
+        with next(get_staging_session()) as session:
+            if update_review_status(session, staging_id, ReviewStatus.UNDER_REVIEW, notes=notes):
+                click.echo(f"Flagged staging joke {staging_id} for review")
+            else:
+                click.echo(f"Staging joke not found: {staging_id}", err=True)
+                sys.exit(1)
+
+    except Exception as e:
+        click.echo(f"Error flagging joke: {e}", err=True)
+        sys.exit(1)
+
+
+@cli.command("approve-batch")
+@click.argument("import_id")
+@click.option("--min-score", type=float, help="Minimum score to approve")
+@click.option(
+    "--staging-db",
+    type=click.Path(),
+    default=None,
+    help="Path to staging database",
+)
+def approve_batch_cmd(import_id: str, min_score: float | None, staging_db: str | None) -> None:
+    """Approve all jokes in an import batch.
+
+    IMPORT_ID: UUID of the import batch
+
+    Examples:
+        # Approve all jokes in batch
+        python -m joke_emporium.importers.cli approve-batch <import_id>
+
+        # Approve only high-quality jokes
+        python -m joke_emporium.importers.cli approve-batch <import_id> --min-score 1000
+    """
+    try:
+        db_url = f"sqlite:///{staging_db}" if staging_db else None
+        init_staging_db(db_url)
+
+        with next(get_staging_session()) as session:
+            count = approve_batch_by_quality(session, import_id, min_score=min_score)
+            click.echo(f"Approved {count} jokes from import {import_id}")
+
+    except Exception as e:
+        click.echo(f"Error approving batch: {e}", err=True)
+        sys.exit(1)
+
+
+@cli.command("review")
+@click.argument("import_id")
+@click.option(
+    "--status",
+    type=click.Choice(["pending", "approved", "rejected", "under_review", "duplicate", "all"]),
+    default="all",
+    help="Filter by review status",
+)
+@click.option("--limit", type=int, default=20, help="Max jokes to show")
+@click.option("--verbose", is_flag=True, help="Show full joke details")
+@click.option(
+    "--staging-db",
+    type=click.Path(),
+    default=None,
+    help="Path to staging database",
+)
+def review_cmd(
+    import_id: str, status: str, limit: int, verbose: bool, staging_db: str | None
+) -> None:
+    """Review jokes in an import batch before merging.
+
+    IMPORT_ID: UUID of the import batch
+
+    Examples:
+        # Review pending jokes
+        python -m joke_emporium.importers.cli review <import_id>
+
+        # Review approved jokes
+        python -m joke_emporium.importers.cli review <import_id> --status approved
+
+        # Show full details
+        python -m joke_emporium.importers.cli review <import_id> --verbose
+    """
+    try:
+        db_url = f"sqlite:///{staging_db}" if staging_db else None
+        init_staging_db(db_url)
+
+        with next(get_staging_session()) as session:
+            # Get import batch
+            batch = get_import_batch(session, import_id)
+            if not batch:
+                click.echo(f"Import batch not found: {import_id}", err=True)
+                sys.exit(1)
+
+            # Get jokes
+            jokes = get_staging_jokes_by_status(
+                session,
+                batch.id,
+                status=None if status == "all" else status,
+                limit=limit
+            )
+
+            if not jokes:
+                click.echo(f"No jokes found with status: {status}")
+                return
+
+            click.echo(f"\nReviewing {len(jokes)} joke(s) from import {import_id}")
+            click.echo("=" * 80)
+
+            for staging_joke in jokes:
+                import json
+                # Parse joke content
+                content_data = json.loads(staging_joke.content_json)
+                joke_text = " ".join(elem.get("text", "") for elem in content_data)
+
+                # Show joke ID and status
+                status_icon = {
+                    "pending": "⏸",
+                    "approved": "✓",
+                    "rejected": "✗",
+                    "under_review": "⚠",
+                    "duplicate": "≈",
+                    "merged": "→",
+                }.get(staging_joke.review_status, "?")
+
+                click.echo(f"\n{status_icon} ID: {staging_joke.id} | UUID: {staging_joke.joke_uuid}")
+                click.echo(f"   Status: {staging_joke.review_status}")
+
+                # Show joke text
+                preview = joke_text[:100] + "..." if len(joke_text) > 100 else joke_text
+                click.echo(f"   Text: {preview}")
+
+                # Show key metadata
+                tags_data = json.loads(staging_joke.tags_json) if staging_joke.tags_json else []
+                if tags_data:
+                    click.echo(f"   Tags: {', '.join(tags_data[:5])}")
+                if staging_joke.weighted_avg_funniness:
+                    click.echo(f"   Avg Score: {staging_joke.weighted_avg_funniness:.1f}")
+
+                # Show verbose details
+                if verbose:
+                    click.echo(f"   Maturity: {staging_joke.maturity_rating}")
+                    if staging_joke.structure:
+                        click.echo(f"   Structure: {staging_joke.structure}")
+                    if staging_joke.review_notes:
+                        click.echo(f"   Notes: {staging_joke.review_notes}")
+
+                click.echo("   " + "-" * 76)
+
+            click.echo(f"\nShowing {len(jokes)} joke(s)")
+
+    except Exception as e:
+        click.echo(f"Error reviewing jokes: {e}", err=True)
+        logger.exception("Review failed")
+        sys.exit(1)
+
+
 @cli.command("merge")
 @click.argument("import_id")
-@click.option("--auto-approve", is_flag=True, help="Auto-approve all pending jokes")
+@click.option("--dry-run", is_flag=True, help="Preview merge without committing")
 @click.option(
     "--staging-db",
     type=click.Path(),
@@ -400,31 +579,75 @@ def reset(yes: bool, staging_db: str | None) -> None:
     help="Path to production database",
 )
 def merge(
-    import_id: str, auto_approve: bool, staging_db: str | None, prod_db: str | None
+    import_id: str, dry_run: bool, staging_db: str | None, prod_db: str | None
 ) -> None:
     """Merge approved staging jokes to production database.
 
     IMPORT_ID: UUID of the import batch to merge
 
-    Examples:
-        # Merge only approved jokes
-        python -m joke_emporium.importers.cli merge <import_id>
+    Only merges jokes with status='approved'.
+    All operations are transactional (all-or-nothing).
 
-        # Auto-approve and merge all jokes
-        python -m joke_emporium.importers.cli merge <import_id> --auto-approve
+    Examples:
+        # Preview merge
+        python -m joke_emporium.importers.cli merge <import_id> --dry-run
+
+        # Perform merge
+        python -m joke_emporium.importers.cli merge <import_id>
     """
     try:
-        click.echo("Merge functionality coming soon!")
-        click.echo("This will:")
-        click.echo("  1. Query approved jokes from staging")
-        click.echo("  2. Check for duplicates in production")
-        click.echo("  3. Insert new jokes into production")
-        click.echo("  4. Update import batch status")
+        from joke_emporium.db.production import get_production_session, init_production_db
+        from joke_emporium.db.merge import merge_approved_jokes
 
-        # TODO: Implement merge logic
+        # Initialize databases
+        staging_db_url = f"sqlite:///{staging_db}" if staging_db else None
+        init_staging_db(staging_db_url)
 
+        prod_db_url = f"sqlite:///{prod_db}" if prod_db else None
+        init_production_db(prod_db_url)
+
+        with next(get_staging_session()) as staging_session:
+            # Get import batch
+            batch = get_import_batch(staging_session, import_id)
+            if not batch:
+                click.echo(f"Import batch not found: {import_id}", err=True)
+                sys.exit(1)
+
+            with next(get_production_session()) as production_session:
+                try:
+                    stats = merge_approved_jokes(
+                        staging_session,
+                        production_session,
+                        batch.id,
+                        batch.source,
+                        dry_run=dry_run
+                    )
+
+                    if dry_run:
+                        click.echo("\n🔍 DRY RUN - No changes committed\n")
+                    else:
+                        click.echo("\n✓ MERGE COMPLETE\n")
+
+                    click.echo("=" * 60)
+                    click.echo(f"Total jokes reviewed: {stats['total']}")
+                    click.echo(f"Merged to production: {stats['merged']}")
+                    click.echo(f"Skipped (duplicate): {stats['skipped_duplicate']}")
+                    click.echo(f"Failed: {stats['failed']}")
+                    click.echo("=" * 60)
+
+                except Exception as e:
+                    click.echo(f"\n✗ Merge failed: {e}")
+                    if not dry_run:
+                        click.echo("All changes rolled back (transaction failed)")
+                    raise
+
+    except ImportError as e:
+        click.echo(f"Error: Missing module for merge: {e}", err=True)
+        click.echo("Make sure merge.py is implemented.", err=True)
+        sys.exit(1)
     except Exception as e:
         click.echo(f"Error merging import: {e}", err=True)
+        logger.exception("Merge failed")
         sys.exit(1)
 
 
