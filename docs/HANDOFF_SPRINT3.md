@@ -40,8 +40,8 @@ Implement the ability to review staged jokes, mark them for approval/rejection, 
 │  - Rejected     │                  │  - Jokes         │
 │  - Under Review │  Merge Process   │  - Authors       │
 └─────────────────┘ ───────────────> │  - Ratings       │
-                                      │  - Collections   │
-                                      └──────────────────┘
+                                     │  - Collections   │
+                                     └──────────────────┘
 ```
 
 ## Implementation Steps
