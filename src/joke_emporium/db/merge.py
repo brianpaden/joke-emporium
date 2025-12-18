@@ -9,7 +9,6 @@ from joke_emporium.db.deduplication import check_duplicate_in_production
 from joke_emporium.db.models.staging import ReviewStatus
 from joke_emporium.db.production import save_joke_to_production
 from joke_emporium.db.staging import get_staging_jokes_by_status
-from joke_emporium.models.joke import Joke
 
 logger = logging.getLogger(__name__)
 

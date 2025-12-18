@@ -35,8 +35,8 @@ class Joke(BaseModel):
     mechanisms: list[LinguisticMechanism] = Field(
         default_factory=list, description="Linguistic mechanisms used (puns, wordplay, etc.)"
     )
-    maturity_rating: MaturityRating = Field(
-        default=MaturityRating.G, description="Content maturity rating (G, PG, PG13, R, X)"
+    maturity_rating: MaturityRating | None = Field(
+        default=None, description="Content maturity rating (G, PG, PG13, R, X). None if unknown."
     )
     cognitive_type: CognitiveType | None = Field(default=None, description="Cognitive joke type (Chalmers taxonomy)")
 

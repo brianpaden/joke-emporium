@@ -78,7 +78,7 @@ class StagingJokeDB(SQLModel, table=True):
 
     # Categorization (from JokeDB)
     structure: str | None = Field(default=None, max_length=50, description="Structure type")
-    maturity_rating: str = Field(max_length=10, default="g", description="Maturity rating")
+    maturity_rating: str | None = Field(default=None, max_length=10, description="Maturity rating (None if unknown)")
     cognitive_type: str | None = Field(default=None, max_length=50, description="Cognitive type")
 
     # Tags (from JokeDB)
@@ -211,7 +211,7 @@ class StagingJokeDB(SQLModel, table=True):
         import json
 
         from joke_emporium.models.content import JokeElement
-        from joke_emporium.models.enums import Category, LinguisticMechanism, MaturityRating, SourcePlatform
+        from joke_emporium.models.enums import MaturityRating, SourcePlatform
         from joke_emporium.models.flags import ContentFlags
         from joke_emporium.models.gtvh import GTVHAnnotation
         from joke_emporium.models.joke import Joke
@@ -269,7 +269,7 @@ class StagingJokeDB(SQLModel, table=True):
             categories=[],  # Staging doesn't store category relationships
             structure=self.structure,
             mechanisms=[],  # Staging doesn't store mechanism relationships
-            maturity_rating=MaturityRating(self.maturity_rating) if self.maturity_rating else MaturityRating.G,
+            maturity_rating=MaturityRating(self.maturity_rating) if self.maturity_rating else None,
             cognitive_type=self.cognitive_type,
             tags=tags,
             flags=flags,

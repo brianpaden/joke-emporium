@@ -16,7 +16,7 @@ from uuid import uuid4
 from joke_emporium.importers.base import BaseImporter
 from joke_emporium.models.author import Author, AuthorType
 from joke_emporium.models.content import JokeElement
-from joke_emporium.models.enums import Category, ElementType, MaturityRating, SourcePlatform, StructureType
+from joke_emporium.models.enums import Category, ElementType, SourcePlatform, StructureType
 from joke_emporium.models.flags import ContentFlags
 from joke_emporium.models.joke import Joke
 from joke_emporium.models.metadata import JokeMetadata, Source
@@ -179,7 +179,7 @@ class ExampleImporter(BaseImporter):
                 content=content,
                 categories=categories,
                 structure=structure,
-                maturity_rating=MaturityRating.G,  # Default to G-rated
+                maturity_rating=None,  # Set to None if not explicitly known from source
                 tags=[raw_data.get("category")] if raw_data.get("category") else [],
                 flags=ContentFlags(),  # All flags default to False
                 ratings=ratings,

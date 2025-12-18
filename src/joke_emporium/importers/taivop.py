@@ -374,20 +374,24 @@ class TaivopImporter(BaseImporter):
                 except (ValueError, TypeError) as e:
                     logger.debug(f"Invalid score value: {score}, error: {e}")
 
-            # Determine maturity rating
-            maturity = MaturityRating.G  # Default to G-rated
-            safe = raw_data.get("safe", True)
-            nsfw = raw_data.get("nsfw", False)
-
-            if not safe or nsfw:
-                maturity = MaturityRating.R
+            # Determine maturity rating - only set if we have explicit information
+            maturity = None
+            safe = raw_data.get("safe")
+            nsfw = raw_data.get("nsfw")
 
             # Build content flags
             flags = ContentFlags()
-            if not safe or nsfw:
-                flags.offensive = True
 
-            # Check for specific flag fields
+            # Only set maturity rating if we have explicit flag information
+            if safe is not None or nsfw is not None:
+                # If we have explicit safe/nsfw flags, use them
+                if safe is False or nsfw is True:
+                    maturity = MaturityRating.R
+                    flags.offensive = True
+                elif safe is True and (nsfw is False or nsfw is None):
+                    maturity = MaturityRating.G
+
+            # Check for specific flag fields that override maturity
             if raw_data.get("explicit", False):
                 flags.sexual = True
                 maturity = MaturityRating.X
@@ -398,9 +402,15 @@ class TaivopImporter(BaseImporter):
             if raw_data.get("racist", False):
                 flags.offensive = True
                 flags.stereotypical = True
+                # Upgrade to R if not already set higher
+                if maturity is None or maturity == MaturityRating.G:
+                    maturity = MaturityRating.R
             if raw_data.get("sexist", False):
                 flags.offensive = True
                 flags.stereotypical = True
+                # Upgrade to R if not already set higher
+                if maturity is None or maturity == MaturityRating.G:
+                    maturity = MaturityRating.R
 
             # Build metadata
             source_platform = raw_data.get("_source_platform", SourcePlatform.WEBSITE)

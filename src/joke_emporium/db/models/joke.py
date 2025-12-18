@@ -33,7 +33,7 @@ class JokeDB(SQLModel, table=True):
 
     # Categorization
     structure: str | None = Field(default=None, max_length=50, description="Structure type")
-    maturity_rating: str = Field(max_length=10, default="g", description="Maturity rating")
+    maturity_rating: str | None = Field(default=None, max_length=10, description="Maturity rating (None if unknown)")
     cognitive_type: str | None = Field(default=None, max_length=50, description="Cognitive type")
 
     # Tags (stored as JSON array)
@@ -169,7 +169,7 @@ class JokeDB(SQLModel, table=True):
             version=joke.version,
             content_json=content_json,
             structure=joke.structure.value if joke.structure else None,
-            maturity_rating=joke.maturity_rating.value,
+            maturity_rating=joke.maturity_rating.value if joke.maturity_rating else None,
             cognitive_type=joke.cognitive_type.value if joke.cognitive_type else None,
             tags_json=tags_json,
             flags_json=flags_json,
@@ -282,7 +282,7 @@ class JokeDB(SQLModel, table=True):
             categories=categories,
             structure=StructureType(self.structure) if self.structure else None,
             mechanisms=mechanisms,
-            maturity_rating=MaturityRating(self.maturity_rating),
+            maturity_rating=MaturityRating(self.maturity_rating) if self.maturity_rating else None,
             cognitive_type=CognitiveType(self.cognitive_type) if self.cognitive_type else None,
             tags=tags,
             flags=flags,
