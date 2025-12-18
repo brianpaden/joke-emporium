@@ -1,0 +1,42 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+# Python files
+[*.py]
+indent_size = 4
+max_line_length = 120
+
+# YAML and JSON files
+[*.{yml,yaml,json}]
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# Shell scripts
+[*.{sh,bash,ps1}]
+indent_size = 2
+
+# Batch files (Windows)
+[*.{cmd,bat}]
+end_of_line = crlf
+
+# Taskfile
+[Taskfile.yml]
+indent_size = 2
+
+# Makefiles require tabs
+[Makefile]
+indent_style = tab
