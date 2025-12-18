@@ -29,6 +29,11 @@ experiments/
 - 🆕 **`test_enhanced_normalization.py`** - Test enhanced normalization (articles, stop words) on semantic duplicates
 - ⏳ **`analyze_performance.py`** - Performance analysis on varying dataset sizes (future)
 
+### Content & Maturity Rating Analysis
+
+- 🆕 **`analyze_maturity_ratings.py`** - Analyze content distribution and suggest maturity ratings
+- 🆕 **`test_profanity_detection.py`** - Compare profanity detection libraries (better-profanity, profanity-check, custom)
+
 ## Quick Start
 
 ### 1. Find Natural Duplicates
@@ -117,6 +122,47 @@ Tests whether enhanced normalization (article removal, stop word filtering) can 
 - Remaining duplicates are true retellings needing Levenshtein
 - Validates whether to implement enhanced normalization in Sprint 3
 
+### 8. Analyze Maturity Ratings
+
+```bash
+uv run python experiments/scripts/analyze_maturity_ratings.py
+```
+
+Analyzes jokes for content patterns to understand maturity rating distribution and content flags.
+
+**Output:** `experiments/output/maturity_rating_analysis.json` - Content analysis results
+
+**Analysis includes:**
+- Profanity severity distribution (mild, moderate, strong)
+- Sexual content detection (explicit terms, innuendo)
+- Dark humor patterns (death, mortality themes)
+- Violence indicators
+- Suggested rating distribution (G, PG, PG-13, R, X)
+
+### 9. Test Profanity Detection Libraries
+
+```bash
+# Install optional dependencies
+uv pip install better-profanity
+
+# Run comparison
+uv run python experiments/scripts/test_profanity_detection.py
+```
+
+Compares profanity detection approaches for automatic content flagging.
+
+**Output:** `experiments/output/profanity_detection_comparison.json` - Library comparison
+
+**Libraries tested:**
+- better-profanity (fast wordlist-based)
+- profanity-check (ML-based, optional)
+- Custom wordlist (joke-specific severity levels)
+
+**Metrics:**
+- Detection rate and accuracy
+- Performance (jokes/second)
+- Agreement between libraries
+
 ## Data Sources
 
 All scripts use the taivop dataset downloaded to `temp/imports/taivop_joke-dataset/`:
@@ -129,8 +175,10 @@ All scripts use the taivop dataset downloaded to `temp/imports/taivop_joke-datas
 
 ## Related Documentation
 
-- [DEDUPLICATION_EXPERIMENTS.md](../docs/experiments/DEDUPLICATION_EXPERIMENTS.md) - Detailed experiment plan
+- [DEDUPLICATION_EXPERIMENTS.md](../docs/experiments/DEDUPLICATION_EXPERIMENTS.md) - Detailed deduplication experiment plan
 - [REAL_DATA_INTEGRATION.md](../docs/experiments/REAL_DATA_INTEGRATION.md) - Real data integration strategy
+- [MATURITY_RATING_EXPERIMENTS.md](../docs/experiments/MATURITY_RATING_EXPERIMENTS.md) - Content classification and maturity rating experiments
+- [NORMALIZATION_STRATEGIES.md](../docs/experiments/NORMALIZATION_STRATEGIES.md) - Text normalization research
 
 ## Results Summary
 
