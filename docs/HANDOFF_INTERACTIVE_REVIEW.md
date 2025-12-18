@@ -352,6 +352,419 @@ class ReviewFilter:
         return True
 ```
 
+### Edit Modal Implementation
+
+The edit modal is a critical feature for data sanitization during review. Modal appears as overlay with tabbed interface:
+
+**Visual Mockup:**
+
+```
+┌─ Edit Joke: stg_001 ───────────────────────────────────────────────────────┐
+│ [Content] [Metadata] [Flags] [Categories]                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Setup (required):                                                           │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │ Why did the chicken cross the road?                                    │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  Punchline (required):                                                       │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │ To get to the other side!                                              │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  Continuation (optional):                                                    │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │                                                                         │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  Maturity Rating: [G ▼] (G, PG, PG-13, R, X)                               │
+│                                                                              │
+│  Tags: animals, classic, family-friendly                                     │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │ + Add tag...                                                            │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                    [Save (Ctrl+S)] [Cancel (Esc)]                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Metadata Tab:**
+
+```
+┌─ Edit Joke: stg_001 ───────────────────────────────────────────────────────┐
+│ [Content] [Metadata] [Flags] [Categories]                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Structure: [QUESTION_ANSWER ▼]                                             │
+│             (QUESTION_ANSWER, OBSERVATIONAL, STORY, ONE_LINER, ...)         │
+│                                                                              │
+│  Linguistic Mechanisms (multi-select):                                       │
+│  ☑ INCONGRUITY          ☐ WORDPLAY           ☐ EXAGGERATION                 │
+│  ☐ MISDIRECTION         ☐ ABSURDITY          ☐ IRONY                        │
+│  ☐ UNDERSTATEMENT       ☐ CALLBACK           ☐ SARCASM                      │
+│  [Show all 25 mechanisms...]                                                │
+│                                                                              │
+│  Author:                                                                     │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │ u/comedian123                                                           │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  Source URL:                                                                 │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │ https://reddit.com/r/jokes/comments/abc123                             │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                    [Save (Ctrl+S)] [Cancel (Esc)]                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Flags Tab:**
+
+```
+┌─ Edit Joke: stg_001 ───────────────────────────────────────────────────────┐
+│ [Content] [Metadata] [Flags] [Categories]                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Content Flags:                                                              │
+│  ☐ NSFW               ☐ Explicit             ☐ Political                    │
+│  ☐ Religious          ☐ Racist               ☐ Sexist                       │
+│  ☐ Dark Humor         ☐ Potentially Offensive                               │
+│                                                                              │
+│  Quality Flags:                                                              │
+│  ☐ Original           ☐ Verified             ☐ High Quality                 │
+│  ☐ Low Effort         ☐ Needs Fact Check                                    │
+│                                                                              │
+│  Technical Flags:                                                            │
+│  ☐ Duplicate          ☐ Incomplete           ☐ Malformed                    │
+│                                                                              │
+│  Flag Notes:                                                                 │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │ Optional notes about why flags were added...                            │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                    [Save (Ctrl+S)] [Cancel (Esc)]                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Categories Tab:**
+
+```
+┌─ Edit Joke: stg_001 ───────────────────────────────────────────────────────┐
+│ [Content] [Metadata] [Flags] [Categories]                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Categories (multi-select, max 5 recommended):                               │
+│                                                                              │
+│  Selected: [ANIMALS] [WORDPLAY]                                             │
+│                                                                              │
+│  ┌── Available Categories ──────────────────────────────────────────────┐  │
+│  │ Search: [________________________________________]                    │  │
+│  │                                                                       │  │
+│  │ ☑ ANIMALS                ☐ ABSURDIST           ☐ DARK_HUMOR         │  │
+│  │ ☐ ANTI_JOKES             ☐ BLONDE_JOKES        ☐ DAD_JOKES          │  │
+│  │ ☐ DOCTOR                 ☐ ETHNIC               ☐ FOOD               │  │
+│  │ ☐ INSULTS                ☐ KNOCK_KNOCK         ☐ LAWYER             │  │
+│  │ ☐ LIGHTBULB              ☐ META                 ☐ OFFICE_WORK       │  │
+│  │ ☐ POLITICAL              ☐ PROGRAMMING         ☐ PUNS               │  │
+│  │ ☐ RELATIONSHIPS          ☐ RELIGIOUS           ☐ SCHOOL             │  │
+│  │ ☐ SCIENCE                ☐ SPORTS               ☐ TECHNOLOGY        │  │
+│  │ ☑ WORDPLAY               ☐ YO_MAMA              ☐ OTHER              │  │
+│  │                                                                       │  │
+│  │ [Show all 40+ categories...]                                          │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                    [Save (Ctrl+S)] [Cancel (Esc)]                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Code Implementation:**
+
+```python
+from textual.screen import ModalScreen
+from textual.widgets import TabbedContent, TabPane, TextArea, Select, Checkbox, Input, Button
+from textual.containers import Vertical, Horizontal, Grid
+
+class EditJokeModal(ModalScreen):
+    """Modal screen for editing joke content and metadata."""
+
+    CSS = """
+    EditJokeModal {
+        align: center middle;
+    }
+
+    #edit-dialog {
+        width: 90%;
+        height: 80%;
+        border: thick $primary;
+        background: $surface;
+        padding: 1;
+    }
+    """
+
+    def __init__(self, joke: StagingJokeDB):
+        super().__init__()
+        self.joke = joke
+        self.original_joke = self._snapshot_joke(joke)
+        self.modified = False
+
+    def compose(self) -> ComposeResult:
+        with Vertical(id="edit-dialog"):
+            yield Static("Edit Joke: " + self.joke.staging_id, id="title")
+
+            with TabbedContent():
+                # Content Tab
+                with TabPane("Content"):
+                    yield Static("Setup (required):")
+                    yield TextArea(
+                        self._get_joke_element("setup"),
+                        id="setup_input"
+                    )
+                    yield Static("Punchline (required):")
+                    yield TextArea(
+                        self._get_joke_element("punchline"),
+                        id="punchline_input"
+                    )
+                    yield Static("Continuation (optional):")
+                    yield TextArea(
+                        self._get_joke_element("continuation"),
+                        id="continuation_input"
+                    )
+                    yield Static("Maturity Rating:")
+                    yield Select(
+                        [(mr.value, mr) for mr in MaturityRating],
+                        value=self.joke.maturity_rating,
+                        id="maturity_select"
+                    )
+                    yield Static("Tags (comma-separated):")
+                    yield Input(
+                        value=", ".join(self.joke.tags or []),
+                        id="tags_input"
+                    )
+
+                # Metadata Tab
+                with TabPane("Metadata"):
+                    yield Static("Structure:")
+                    yield Select(
+                        [(st.value, st) for st in JokeStructure],
+                        value=self.joke.structure,
+                        id="structure_select"
+                    )
+                    yield Static("Linguistic Mechanisms:")
+                    yield Grid(
+                        *[Checkbox(mech.value, value=mech in self.joke.mechanisms)
+                          for mech in LinguisticMechanism],
+                        id="mechanisms_grid"
+                    )
+                    yield Static("Author:")
+                    yield Input(
+                        value=self.joke.author_name or "",
+                        id="author_input"
+                    )
+                    yield Static("Source URL:")
+                    yield Input(
+                        value=self.joke.source_url or "",
+                        id="source_url_input"
+                    )
+
+                # Flags Tab
+                with TabPane("Flags"):
+                    yield Static("Content Flags:")
+                    yield Grid(
+                        Checkbox("NSFW", value=self.joke.flags.get("nsfw", False)),
+                        Checkbox("Explicit", value=self.joke.flags.get("explicit", False)),
+                        Checkbox("Political", value=self.joke.flags.get("political", False)),
+                        Checkbox("Religious", value=self.joke.flags.get("religious", False)),
+                        Checkbox("Racist", value=self.joke.flags.get("racist", False)),
+                        Checkbox("Sexist", value=self.joke.flags.get("sexist", False)),
+                        id="flags_grid"
+                    )
+                    yield Static("Flag Notes:")
+                    yield TextArea(
+                        self.joke.review_notes or "",
+                        id="flag_notes_input"
+                    )
+
+                # Categories Tab
+                with TabPane("Categories"):
+                    yield Static("Selected: " + ", ".join(c.value for c in self.joke.categories))
+                    yield Static("Search:")
+                    yield Input(placeholder="Filter categories...", id="category_search")
+                    yield Grid(
+                        *[Checkbox(cat.value, value=cat in self.joke.categories)
+                          for cat in JokeCategory],
+                        id="categories_grid"
+                    )
+
+            with Horizontal():
+                yield Button("Save (Ctrl+S)", variant="primary", id="save_btn")
+                yield Button("Cancel (Esc)", variant="default", id="cancel_btn")
+
+    def _get_joke_element(self, element_type: str) -> str:
+        """Extract content element from joke."""
+        for element in self.joke.content:
+            if element.type == element_type:
+                return element.text
+        return ""
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "save_btn":
+            self._save_changes()
+            self.dismiss(self.joke)
+        elif event.button.id == "cancel_btn":
+            if self.modified and not self._confirm_discard():
+                return
+            self.dismiss(None)
+
+    def on_key(self, event: events.Key) -> None:
+        if event.key == "ctrl+s":
+            self._save_changes()
+            self.dismiss(self.joke)
+        elif event.key == "escape":
+            if self.modified and not self._confirm_discard():
+                return
+            self.dismiss(None)
+
+    def _save_changes(self) -> None:
+        """Save all changes back to the joke object."""
+        # Update content
+        setup = self.query_one("#setup_input", TextArea).text
+        punchline = self.query_one("#punchline_input", TextArea).text
+        continuation = self.query_one("#continuation_input", TextArea).text
+
+        self.joke.content = []
+        if setup:
+            self.joke.content.append({"type": "setup", "text": setup})
+        if punchline:
+            self.joke.content.append({"type": "punchline", "text": punchline})
+        if continuation:
+            self.joke.content.append({"type": "continuation", "text": continuation})
+
+        # Update maturity
+        self.joke.maturity_rating = self.query_one("#maturity_select", Select).value
+
+        # Update tags
+        tags_text = self.query_one("#tags_input", Input).value
+        self.joke.tags = [t.strip() for t in tags_text.split(",") if t.strip()]
+
+        # Update structure
+        self.joke.structure = self.query_one("#structure_select", Select).value
+
+        # Update mechanisms (from checkboxes)
+        mechanisms = []
+        for checkbox in self.query("#mechanisms_grid Checkbox"):
+            if checkbox.value:
+                mechanisms.append(LinguisticMechanism(checkbox.label))
+        self.joke.mechanisms = mechanisms
+
+        # Update flags (from checkboxes)
+        flags = {}
+        for checkbox in self.query("#flags_grid Checkbox"):
+            flags[checkbox.label.lower()] = checkbox.value
+        self.joke.flags = flags
+
+        # Update categories (from checkboxes)
+        categories = []
+        for checkbox in self.query("#categories_grid Checkbox"):
+            if checkbox.value:
+                categories.append(JokeCategory(checkbox.label))
+        self.joke.categories = categories
+
+        # Update text_preview (cached field)
+        self.joke.text_preview = f"{setup} {punchline}"[:200]
+
+        self.modified = True
+
+    def _snapshot_joke(self, joke: StagingJokeDB) -> dict:
+        """Create snapshot for undo functionality."""
+        return {
+            "content": joke.content.copy(),
+            "maturity_rating": joke.maturity_rating,
+            "tags": joke.tags.copy() if joke.tags else [],
+            "structure": joke.structure,
+            "mechanisms": joke.mechanisms.copy(),
+            "flags": joke.flags.copy(),
+            "categories": joke.categories.copy(),
+        }
+
+    def _confirm_discard(self) -> bool:
+        """Confirm discarding unsaved changes."""
+        # Use a confirmation dialog (implementation omitted for brevity)
+        return True
+```
+
+**Edit Validation:**
+
+```python
+def validate_edit(joke: StagingJokeDB) -> list[str]:
+    """Validate edited joke meets requirements."""
+    errors = []
+
+    # Required fields
+    if not any(e.get("type") == "setup" for e in joke.content):
+        errors.append("Setup is required")
+    if not any(e.get("type") == "punchline" for e in joke.content):
+        errors.append("Punchline is required")
+
+    # Length validation
+    setup_text = next((e["text"] for e in joke.content if e["type"] == "setup"), "")
+    if len(setup_text) < 5:
+        errors.append("Setup too short (min 5 characters)")
+    if len(setup_text) > 2000:
+        errors.append("Setup too long (max 2000 characters)")
+
+    # Maturity/flag consistency
+    if joke.maturity_rating == MaturityRating.G and joke.flags.get("nsfw"):
+        errors.append("G-rated jokes cannot be NSFW")
+
+    # Category limits
+    if len(joke.categories) > 10:
+        errors.append("Too many categories (max 10)")
+
+    return errors
+```
+
+**Usage in Review Flow:**
+
+```python
+# In ReviewApp class
+def action_edit(self) -> None:
+    """Open edit modal for selected joke."""
+    joke = self.get_current_joke()
+
+    def handle_edit_result(edited_joke: StagingJokeDB | None) -> None:
+        if edited_joke:
+            # Validate changes
+            errors = validate_edit(edited_joke)
+            if errors:
+                self.show_error("Validation failed:\n" + "\n".join(errors))
+                return
+
+            # Save to database
+            with self.session:
+                self.session.add(edited_joke)
+                self.session.commit()
+
+            # Track for undo
+            self.history.append({
+                "action": "edit",
+                "joke_id": edited_joke.id,
+                "before": self._snapshot_joke(joke),
+                "after": self._snapshot_joke(edited_joke)
+            })
+
+            # Update UI
+            self.refresh_current_row()
+            self.stats.edits_count += 1
+            self.show_success(f"Saved changes to {edited_joke.staging_id}")
+
+    self.push_screen(EditJokeModal(joke), handle_edit_result)
+```
+
 ## Edge Cases & Considerations
 
 1. **Large datasets** - Paginate/lazy-load for 50k+ jokes
@@ -361,6 +774,45 @@ class ReviewFilter:
 5. **Concurrent edits** - Warn if batch modified externally
 6. **Unicode rendering** - Ensure emojis/special chars display correctly
 7. **Performance** - Smooth scrolling even with 1000s of jokes
+8. **Edit validation** - Prevent invalid data from being saved
+9. **Unsaved changes** - Warn before closing edit modal with unsaved edits
+
+### Common Data Sanitization Use Cases
+
+The inline editing feature addresses real-world data quality issues found during review:
+
+1. **Typos and Grammar** - Fix spelling errors, punctuation, formatting
+   - Example: "your so funny" → "you're so funny"
+   - Example: Missing punctuation in punchline
+
+2. **Maturity Rating Corrections** - Adjust ratings that don't match content
+   - Example: Mild innuendo marked as R → change to PG-13
+   - Example: Explicit language but marked G → correct to R
+
+3. **Category Refinement** - Add missing categories or remove incorrect ones
+   - Example: Tech joke missing PROGRAMMING category
+   - Example: Remove ANIMALS category from non-animal joke
+
+4. **Flag Management** - Add or correct content flags
+   - Example: Political joke missing "political" flag
+   - Example: Mark NSFW content that wasn't flagged by source
+
+5. **Content Cleanup** - Remove artifacts from import process
+   - Example: Remove "[deleted]" text from Reddit imports
+   - Example: Clean up HTML entities (&amp; → &)
+   - Example: Normalize line breaks and whitespace
+
+6. **Mechanism Tagging** - Add linguistic mechanism tags for better search
+   - Example: Obvious pun missing WORDPLAY mechanism
+   - Example: Add MISDIRECTION to setup/punchline jokes
+
+7. **Tag Additions** - Add descriptive tags for better organization
+   - Example: Add "family-friendly", "clever", "groan-worthy"
+   - Example: Source-specific tags: "reddit-classic", "twitter-viral"
+
+8. **Structure Corrections** - Fix misclassified joke structures
+   - Example: Knock-knock joke marked as ONE_LINER → CALL_AND_RESPONSE
+   - Example: Story joke marked as QUESTION_ANSWER → STORY
 
 ## Testing Strategy
 

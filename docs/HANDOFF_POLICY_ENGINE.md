@@ -261,6 +261,7 @@ def apply_policies(self, session, import_batch_id, dry_run=False) -> dict:
 
 ## Related Documents
 
+- [docs/POLICY_ENGINE_CONDITIONS.md](POLICY_ENGINE_CONDITIONS.md) - PolicyCondition checks to implement
 - [docs/HANDOFF_INTERACTIVE_REVIEW.md](HANDOFF_INTERACTIVE_REVIEW.md) - TUI for manual review
 - [docs/DATABASE.md](DATABASE.md) - Staging workflow details
 - [docs/IMPORT_PLAN.md](IMPORT_PLAN.md) - Original import framework plan
