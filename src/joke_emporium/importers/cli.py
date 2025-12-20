@@ -1,12 +1,30 @@
 """Command-line interface for joke importers."""
 
+from __future__ import annotations
+
 import logging
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 import click
+import yaml
+from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
+)
+from rich.prompt import Confirm
+from rich.table import Table
 
-from joke_emporium.db.models.staging import ReviewStatus
+from joke_emporium.db.models.staging import ImportBatchDB, ReviewStatus
+
+if TYPE_CHECKING:
+    from joke_emporium.importers.policies import PolicyEngine, PolicyStats
 from joke_emporium.db.staging import (
     approve_batch_by_quality,
     approve_staging_joke,
@@ -392,14 +410,21 @@ def approve_batch_cmd(import_id: str, min_score: float | None, staging_db: str |
 )
 @click.option("--limit", type=int, default=20, help="Max jokes to show")
 @click.option("-v", "--verbose", count=True, help="Increase verbosity (use -v, -vv, or -vvv for more detail)")
-@click.option("--max-chars", type=int, default=None, help="Max characters to show for joke text (default: 100, -v: 300, -vv: 500, -vvv: unlimited)")
+@click.option(
+    "--max-chars",
+    type=int,
+    default=None,
+    help="Max characters to show for joke text (default: 100, -v: 300, -vv: 500, -vvv: unlimited)",
+)
 @click.option(
     "--staging-db",
     type=click.Path(),
     default=None,
     help="Path to staging database",
 )
-def review_cmd(import_id: str | None, status: str, limit: int, verbose: int, max_chars: int | None, staging_db: str | None) -> None:
+def review_cmd(
+    import_id: str | None, status: str, limit: int, verbose: int, max_chars: int | None, staging_db: str | None
+) -> None:
     """Review jokes before merging to production.
 
     IMPORT_ID: Optional UUID of the import batch to filter by
@@ -489,7 +514,7 @@ def review_cmd(import_id: str | None, status: str, limit: int, verbose: int, max
 
                 # Level 1+ (-v): Show tags and scores
                 if verbose >= 1:
-                    tags_data = json.loads(staging_joke.tags_json) if staging_joke.tags_json else []
+                    tags_data: Any = json.loads(staging_joke.tags_json) if staging_joke.tags_json else []
                     if tags_data:
                         tag_preview = tags_data[:5] if verbose < 3 else tags_data
                         click.echo(f"   Tags: {', '.join(tag_preview)}")
@@ -531,7 +556,7 @@ def review_cmd(import_id: str | None, status: str, limit: int, verbose: int, max
                     click.echo(f"   Modified: {staging_joke.last_modified}")
 
                     # Flags
-                    flags_data = json.loads(staging_joke.flags_json) if staging_joke.flags_json else {}
+                    flags_data: Any = json.loads(staging_joke.flags_json) if staging_joke.flags_json else {}
                     if flags_data:
                         click.echo(f"   Flags: {flags_data}")
 
@@ -617,15 +642,22 @@ def merge(import_id: str, dry_run: bool, staging_db: str | None, prod_db: str | 
 
         with next(get_staging_session()) as staging_session:
             # Get import batch
-            batch = get_import_batch(staging_session, import_id)
+            batch: ImportBatchDB | None = get_import_batch(staging_session, import_id)
             if not batch:
                 click.echo(f"Import batch not found: {import_id}", err=True)
                 sys.exit(1)
 
             with next(get_production_session()) as production_session:
                 try:
+                    if not batch.id:
+                        raise ValueError("Import batch ID is missing")
+
                     stats = merge_approved_jokes(
-                        staging_session, production_session, batch.id, batch.source, dry_run=dry_run
+                        staging_session,
+                        production_session,
+                        batch.id,
+                        batch.source,
+                        dry_run=dry_run,
                     )
 
                     if dry_run:
@@ -654,6 +686,262 @@ def merge(import_id: str, dry_run: bool, staging_db: str | None, prod_db: str | 
         click.echo(f"Error merging import: {e}", err=True)
         logger.exception("Merge failed")
         sys.exit(1)
+
+
+@cli.command("apply-policies")
+@click.argument("import_id")
+@click.option(
+    "--config",
+    type=click.Path(exists=False),
+    default="config/import_policies.yaml",
+    help="Path to YAML policy configuration file",
+)
+@click.option("--dry-run", is_flag=True, help="Preview changes without applying them")
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation prompt")
+@click.option(
+    "--staging-db",
+    type=click.Path(),
+    default=None,
+    help="Path to staging database",
+)
+def apply_policies_cmd(
+    import_id: str,
+    config: str,
+    dry_run: bool,
+    yes: bool,
+    staging_db: str | None,
+) -> None:
+    """Apply automated policies to staging jokes in an import batch.
+
+    Evaluates all pending jokes against the policy configuration and
+    automatically approves, rejects, or flags jokes based on matching rules.
+
+    IMPORT_ID: UUID of the import batch to process
+
+    Examples:
+        # Preview what would happen (dry-run)
+        python -m joke_emporium.importers.cli apply-policies <import_id> --dry-run
+
+        # Apply with default config
+        python -m joke_emporium.importers.cli apply-policies <import_id>
+
+        # Apply with custom config
+        python -m joke_emporium.importers.cli apply-policies <import_id> --config config/strict.yaml
+
+        # Skip confirmation prompt
+        python -m joke_emporium.importers.cli apply-policies <import_id> --yes
+    """
+    console = Console()
+
+    try:
+        # Validate config file exists
+        config_path = Path(config)
+        if not config_path.exists():
+            console.print(f"[red]Error:[/red] Config file not found: {config_path}")
+            console.print("\nTo create a policy config, see docs/IMPORT_PLAN.md for examples.")
+            sys.exit(1)
+
+        # Load policy engine
+        try:
+            from joke_emporium.importers.policies import PolicyEngine
+
+            engine = PolicyEngine.from_yaml(config_path)
+        except yaml.YAMLError as e:
+            console.print(f"[red]Error:[/red] Invalid YAML in config file: {e}")
+            sys.exit(1)
+        except ValueError as e:
+            console.print(f"[red]Error:[/red] Invalid policy configuration: {e}")
+            sys.exit(1)
+
+        # Validate configuration
+        config_issues = engine.validate_config()
+        if config_issues:
+            console.print("[yellow]Warning:[/yellow] Policy configuration issues detected:")
+            for issue in config_issues:
+                console.print(f"  - {issue}")
+            console.print()
+
+        # Initialize database
+        db_url = f"sqlite:///{staging_db}" if staging_db else None
+        init_staging_db(db_url)
+
+        with next(get_staging_session()) as session:
+            # Get import batch
+            batch: ImportBatchDB | None = get_import_batch(session, import_id)
+            if not batch:
+                console.print(f"[red]Error:[/red] Import batch not found: {import_id}")
+                sys.exit(1)
+
+            if batch.id is None:
+                console.print("[red]Error:[/red] Import batch has no ID")
+                sys.exit(1)
+
+            # Count pending jokes
+            pending_jokes = get_staging_jokes_by_status(session, import_batch_id=batch.id, status=ReviewStatus.PENDING)
+            pending_count = len(pending_jokes)
+
+            if pending_count == 0:
+                console.print(f"[yellow]No pending jokes found in import batch:[/yellow] {import_id}")
+                console.print("All jokes may have already been processed.")
+                return
+
+            # Get policy summary
+            policy_summary = engine.get_policy_summary()
+
+            # Show confirmation prompt (unless --yes or --dry-run)
+            if not yes and not dry_run:
+                console.print()
+                console.print(f"[bold]About to apply policies to import batch:[/bold] {import_id}")
+                console.print(f"  - Total pending jokes: [cyan]{pending_count:,}[/cyan]")
+                console.print(f"  - Config: [cyan]{config_path}[/cyan]")
+                console.print(f"  - Loaded [cyan]{policy_summary['total']}[/cyan] policies:")
+                console.print(f"    - Auto-approve: {policy_summary['auto_approve']['count']}")
+                console.print(f"    - Auto-reject: {policy_summary['auto_reject']['count']}")
+                console.print(f"    - Flag for review: {policy_summary['flag_for_review']['count']}")
+                console.print()
+
+                if not Confirm.ask("Continue?", default=False):
+                    console.print("[yellow]Cancelled.[/yellow]")
+                    return
+
+            # Apply policies with progress bar
+            console.print()
+            if dry_run:
+                console.print(f"[bold blue][DRY RUN][/bold blue] Evaluating policies for import batch: {import_id}")
+            else:
+                console.print(f"[bold]Applying policies to import batch:[/bold] {import_id}")
+
+            # Use progress bar for large batches
+            if pending_count > 100:
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    BarColumn(),
+                    TaskProgressColumn(),
+                    TimeElapsedColumn(),
+                    console=console,
+                ) as progress:
+                    task = progress.add_task("Processing jokes...", total=pending_count)
+
+                    # Apply policies
+                    stats = engine.apply_policies(
+                        session,
+                        batch.id,
+                        dry_run=dry_run,
+                    )
+
+                    progress.update(task, completed=pending_count)
+            else:
+                # Small batch, just apply directly
+                stats = engine.apply_policies(
+                    session,
+                    batch.id,
+                    dry_run=dry_run,
+                )
+
+            # Display results table
+            console.print()
+            _display_policy_results(console, stats, dry_run)
+
+            # Display policy breakdown
+            if stats.policy_counts:
+                _display_policy_breakdown(console, stats, engine)
+
+            # Final message
+            console.print()
+            if dry_run:
+                console.print(
+                    f"[bold blue][DRY RUN][/bold blue] Would process [cyan]{stats.total:,}[/cyan] jokes "
+                    f"in [cyan]{stats.duration_seconds:.1f}[/cyan] seconds"
+                )
+            elif stats.errors == 0:
+                console.print(
+                    f"[bold green]Successfully[/bold green] applied policies to "
+                    f"[cyan]{stats.total:,}[/cyan] jokes in [cyan]{stats.duration_seconds:.1f}[/cyan] seconds"
+                )
+            else:
+                console.print(
+                    f"[bold yellow]Completed with errors:[/bold yellow] processed "
+                    f"[cyan]{stats.total:,}[/cyan] jokes with [red]{stats.errors}[/red] errors "
+                    f"in [cyan]{stats.duration_seconds:.1f}[/cyan] seconds"
+                )
+
+    except Exception as e:
+        console.print(f"[red]Error applying policies:[/red] {e}")
+        logger.exception("Policy application failed")
+        sys.exit(1)
+
+
+def _display_policy_results(console: Console, stats: PolicyStats, dry_run: bool) -> None:
+    """Display the policy application results in a rich table.
+
+    Args:
+        console: Rich console for output
+        stats: PolicyStats from the policy engine
+        dry_run: Whether this was a dry run
+    """
+    title = "Policy Application Results" if not dry_run else "Policy Application Results (DRY RUN)"
+    table = Table(title=title, show_header=True, header_style="bold")
+    table.add_column("Status", style="bold")
+    table.add_column("Count", justify="right")
+
+    # Add rows with appropriate styling
+    table.add_row("Approved", f"[green]{stats.approved:,}[/green]")
+    table.add_row("Rejected", f"[red]{stats.rejected:,}[/red]")
+    table.add_row("Flagged", f"[yellow]{stats.flagged:,}[/yellow]")
+    table.add_row("Skipped", f"[dim]{stats.skipped:,}[/dim]")
+
+    if stats.errors > 0:
+        table.add_row("Errors", f"[red bold]{stats.errors:,}[/red bold]")
+
+    # Add separator and totals
+    table.add_section()
+    table.add_row("Total", f"[bold]{stats.total:,}[/bold]")
+    table.add_row("Duration", f"[cyan]{stats.duration_seconds:.1f}s[/cyan]")
+
+    console.print(table)
+
+
+def _display_policy_breakdown(console: Console, stats: PolicyStats, engine: PolicyEngine) -> None:
+    """Display breakdown of which policies matched how many jokes.
+
+    Args:
+        console: Rich console for output
+        stats: PolicyStats from the policy engine
+        engine: PolicyEngine with policy definitions
+    """
+    # Build a mapping of policy name to action
+    policy_actions: dict[str, str] = {}
+    for policy in engine.auto_approve_policies:
+        policy_actions[policy.name] = "approve"
+    for policy in engine.auto_reject_policies:
+        policy_actions[policy.name] = "reject"
+    for policy in engine.flag_policies:
+        policy_actions[policy.name] = "flag"
+
+    # Create breakdown table
+    table = Table(title="Policy Breakdown", show_header=True, header_style="bold")
+    table.add_column("Policy", style="bold")
+    table.add_column("Action", justify="center")
+    table.add_column("Count", justify="right")
+
+    # Sort by count descending
+    sorted_policies = sorted(stats.policy_counts.items(), key=lambda x: -x[1])
+
+    for policy_name, count in sorted_policies:
+        action = policy_actions.get(policy_name, "unknown")
+
+        # Style action based on type
+        action_style = {
+            "approve": "[green]approve[/green]",
+            "reject": "[red]reject[/red]",
+            "flag": "[yellow]flag[/yellow]",
+        }.get(action, action)
+
+        table.add_row(policy_name, action_style, f"{count:,}")
+
+    console.print()
+    console.print(table)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,159 @@
+# Strict Family-Friendly Policy Configuration
+# ============================================
+# This policy is designed for platforms requiring family-safe content only.
+# It enforces high quality standards and rejects any mature or questionable content.
+#
+# Use case: Children's apps, educational platforms, family entertainment
+#
+# Quality thresholds are based on 0-100 scale (normalized from taivop dataset)
+
+policies:
+  # -------------------------------------------------------------------------
+  # AUTO-APPROVE POLICIES
+  # Only the highest quality, verified safe content gets automatic approval
+  # -------------------------------------------------------------------------
+  auto_approve:
+    - name: "premium_family_content"
+      conditions:
+        - weighted_avg_funniness: ">= 85"
+        - total_ratings_count: ">= 15"
+        - flags.nsfw: "false"
+        - flags.deleted: "false"
+        - flags.removed: "false"
+        - flags.is_test: "false"
+        - maturity_rating: "in ['G', 'PG']"
+      action: approve
+      reason: "Premium quality family-safe content with strong community validation"
+      priority: 1
+
+    - name: "high_quality_general_audience"
+      conditions:
+        - weighted_avg_funniness: ">= 80"
+        - total_ratings_count: ">= 10"
+        - flags.nsfw: "false"
+        - flags.deleted: "false"
+        - flags.removed: "false"
+        - maturity_rating: "G"
+      action: approve
+      reason: "High quality content suitable for all ages"
+      priority: 2
+
+    - name: "good_quality_pg_content"
+      conditions:
+        - weighted_avg_funniness: ">= 80"
+        - total_ratings_count: ">= 10"
+        - flags.nsfw: "false"
+        - flags.deleted: "false"
+        - flags.profanity: "false"
+        - maturity_rating: "PG"
+      action: approve
+      reason: "Good quality PG content without profanity"
+      priority: 3
+
+  # -------------------------------------------------------------------------
+  # AUTO-REJECT POLICIES
+  # Immediately reject inappropriate, low-quality, or problematic content
+  # -------------------------------------------------------------------------
+  auto_reject:
+    - name: "explicit_nsfw_content"
+      conditions:
+        - flags.nsfw: "true"
+      action: reject
+      reason: "NSFW content not allowed in family-friendly policy"
+      priority: 1
+
+    - name: "adult_maturity_rating"
+      conditions:
+        - maturity_rating: "in ['R', 'NC-17']"
+      action: reject
+      reason: "Adult-rated content not allowed"
+      priority: 2
+
+    - name: "deleted_or_removed"
+      conditions:
+        - flags.deleted: "true"
+      action: reject
+      reason: "Content was deleted from source"
+      priority: 3
+
+    - name: "removed_by_moderator"
+      conditions:
+        - flags.removed: "true"
+      action: reject
+      reason: "Content was removed by moderators"
+      priority: 4
+
+    - name: "test_data"
+      conditions:
+        - flags.is_test: "true"
+      action: reject
+      reason: "Test data should not be imported to production"
+      priority: 5
+
+    - name: "very_low_quality"
+      conditions:
+        - weighted_avg_funniness: "< 20"
+        - total_ratings_count: ">= 10"
+      action: reject
+      reason: "Very low quality confirmed by sufficient ratings"
+      priority: 6
+
+    - name: "spam_content"
+      conditions:
+        - flags.spam: "true"
+      action: reject
+      reason: "Detected as spam"
+      priority: 7
+
+  # -------------------------------------------------------------------------
+  # FLAG FOR REVIEW POLICIES
+  # Content that needs human judgment before approval
+  # -------------------------------------------------------------------------
+  flag_for_review:
+    - name: "pg13_content_review"
+      conditions:
+        - maturity_rating: "PG-13"
+      action: flag
+      reason: "PG-13 content requires manual review for family-friendly policy"
+      priority: 1
+
+    - name: "profanity_detected"
+      conditions:
+        - flags.profanity: "true"
+        - flags.nsfw: "false"
+      action: flag
+      reason: "Contains profanity - review for appropriateness"
+      priority: 2
+
+    - name: "borderline_quality"
+      conditions:
+        - weighted_avg_funniness: ">= 60"
+        - weighted_avg_funniness: "< 80"
+        - total_ratings_count: ">= 5"
+      action: flag
+      reason: "Good but not excellent quality - manual verification needed"
+      priority: 3
+
+    - name: "low_moderate_quality"
+      conditions:
+        - weighted_avg_funniness: ">= 20"
+        - weighted_avg_funniness: "< 60"
+        - total_ratings_count: ">= 5"
+      action: flag
+      reason: "Moderate quality - review for potential value"
+      priority: 4
+
+    - name: "missing_maturity_rating"
+      conditions:
+        - maturity_rating: "is_null"
+      action: flag
+      reason: "Missing maturity rating - cannot verify family-safe status"
+      priority: 5
+
+    - name: "insufficient_ratings"
+      conditions:
+        - total_ratings_count: "< 5"
+        - weighted_avg_funniness: ">= 60"
+      action: flag
+      reason: "Good quality but insufficient ratings for confidence"
+      priority: 6

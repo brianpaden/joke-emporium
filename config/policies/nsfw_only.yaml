@@ -1,0 +1,200 @@
+# NSFW/Adult Content Only Policy Configuration
+# =============================================
+# This policy is designed for adult-only platforms that specifically
+# curate mature content. Family-friendly content is rejected.
+#
+# Use case: Adult comedy platforms, 18+ entertainment sites
+#
+# Quality thresholds are based on 0-100 scale (normalized from taivop dataset)
+#
+# WARNING: This policy accepts adult content. Ensure your platform
+# has appropriate age verification and content warnings in place.
+
+policies:
+  # -------------------------------------------------------------------------
+  # AUTO-APPROVE POLICIES
+  # Approve high-quality adult content
+  # -------------------------------------------------------------------------
+  auto_approve:
+    - name: "premium_adult_content"
+      conditions:
+        - weighted_avg_funniness: ">= 80"
+        - total_ratings_count: ">= 10"
+        - flags.nsfw: "true"
+        - flags.deleted: "false"
+        - flags.is_test: "false"
+      action: approve
+      reason: "Premium quality NSFW content with strong ratings"
+      priority: 1
+
+    - name: "high_quality_r_rated"
+      conditions:
+        - weighted_avg_funniness: ">= 75"
+        - total_ratings_count: ">= 8"
+        - maturity_rating: "R"
+        - flags.deleted: "false"
+      action: approve
+      reason: "High quality R-rated content"
+      priority: 2
+
+    - name: "high_quality_nc17"
+      conditions:
+        - weighted_avg_funniness: ">= 75"
+        - total_ratings_count: ">= 8"
+        - maturity_rating: "NC-17"
+        - flags.deleted: "false"
+      action: approve
+      reason: "High quality NC-17 content"
+      priority: 3
+
+    - name: "good_quality_adult"
+      conditions:
+        - weighted_avg_funniness: ">= 70"
+        - total_ratings_count: ">= 5"
+        - maturity_rating: "in ['R', 'NC-17']"
+        - flags.deleted: "false"
+        - flags.is_test: "false"
+      action: approve
+      reason: "Good quality adult-rated content"
+      priority: 4
+
+    - name: "solid_nsfw_content"
+      conditions:
+        - weighted_avg_funniness: ">= 70"
+        - total_ratings_count: ">= 5"
+        - flags.nsfw: "true"
+        - flags.deleted: "false"
+        - flags.spam: "false"
+      action: approve
+      reason: "Solid quality NSFW content meeting standards"
+      priority: 5
+
+  # -------------------------------------------------------------------------
+  # AUTO-REJECT POLICIES
+  # Reject family content and low quality
+  # -------------------------------------------------------------------------
+  auto_reject:
+    - name: "general_audience_content"
+      conditions:
+        - maturity_rating: "G"
+        - flags.nsfw: "false"
+      action: reject
+      reason: "General audience content - not appropriate for adult platform"
+      priority: 1
+
+    - name: "pg_family_content"
+      conditions:
+        - maturity_rating: "PG"
+        - flags.nsfw: "false"
+      action: reject
+      reason: "PG content - not appropriate for adult platform"
+      priority: 2
+
+    - name: "clean_content_no_nsfw"
+      conditions:
+        - flags.nsfw: "false"
+        - maturity_rating: "in ['G', 'PG']"
+      action: reject
+      reason: "Family-friendly content does not fit adult platform"
+      priority: 3
+
+    - name: "deleted_content"
+      conditions:
+        - flags.deleted: "true"
+      action: reject
+      reason: "Content was deleted from source"
+      priority: 4
+
+    - name: "test_data"
+      conditions:
+        - flags.is_test: "true"
+      action: reject
+      reason: "Test data should not be imported"
+      priority: 5
+
+    - name: "low_quality_adult"
+      conditions:
+        - weighted_avg_funniness: "< 30"
+        - total_ratings_count: ">= 5"
+      action: reject
+      reason: "Low quality content - does not meet adult platform standards"
+      priority: 6
+
+    - name: "spam_content"
+      conditions:
+        - flags.spam: "true"
+      action: reject
+      reason: "Detected as spam"
+      priority: 7
+
+  # -------------------------------------------------------------------------
+  # FLAG FOR REVIEW POLICIES
+  # Review borderline and potentially problematic content
+  # -------------------------------------------------------------------------
+  flag_for_review:
+    - name: "borderline_quality"
+      conditions:
+        - weighted_avg_funniness: ">= 50"
+        - weighted_avg_funniness: "< 70"
+        - total_ratings_count: ">= 5"
+        - flags.nsfw: "true"
+      action: flag
+      reason: "Moderate quality NSFW - review for value"
+      priority: 1
+
+    - name: "lower_quality_adult_rated"
+      conditions:
+        - weighted_avg_funniness: ">= 30"
+        - weighted_avg_funniness: "< 50"
+        - maturity_rating: "in ['R', 'NC-17']"
+      action: flag
+      reason: "Lower quality adult content - may have niche appeal"
+      priority: 2
+
+    - name: "pg13_borderline"
+      conditions:
+        - maturity_rating: "PG-13"
+      action: flag
+      reason: "PG-13 content - review if mature enough for platform"
+      priority: 3
+
+    - name: "missing_maturity_rating"
+      conditions:
+        - maturity_rating: "is_null"
+        - flags.nsfw: "is_null"
+      action: flag
+      reason: "Missing maturity classification - cannot determine if adult content"
+      priority: 4
+
+    - name: "nsfw_flag_only"
+      conditions:
+        - flags.nsfw: "true"
+        - maturity_rating: "is_null"
+        - weighted_avg_funniness: ">= 50"
+      action: flag
+      reason: "NSFW flagged but no maturity rating - verify classification"
+      priority: 5
+
+    - name: "extreme_content_gore"
+      conditions:
+        - flags.gore: "true"
+      action: flag
+      reason: "Gore content - verify platform policy compliance"
+      priority: 6
+
+    - name: "extreme_content_violence"
+      conditions:
+        - flags.violence: "true"
+        - flags.nsfw: "true"
+      action: flag
+      reason: "Violence + NSFW combination - review for appropriateness"
+      priority: 7
+
+    - name: "insufficient_ratings_adult"
+      conditions:
+        - total_ratings_count: "< 5"
+        - flags.nsfw: "true"
+        - weighted_avg_funniness: ">= 60"
+      action: flag
+      reason: "Potentially good NSFW content but insufficient ratings"
+      priority: 8

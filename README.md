@@ -7,6 +7,8 @@ A comprehensive, categorized dataset of jokes with rich metadata and scientific 
 - **Structured JSON format** with Pydantic validation
 - **Multi-dimensional categorization**: topics, structure, linguistic mechanisms
 - **Multi-source ratings** with automatic normalization to 1-5 scale
+- **Import framework** for ingesting jokes from external sources
+- **Policy-based auto-approval** for automated review workflows
 - **Academic annotations** supporting GTVH and Chalmers taxonomies
 - **Content flags** for filtering and safety
 - **Python 3.10+** with full type hints
@@ -141,6 +143,8 @@ See [RESEARCH_CATEGORIZATION.md](RESEARCH_CATEGORIZATION.md) for details.
 
 ## Documentation
 
+- [Import Framework Guide](README_IMPORT_FRAMEWORK.md) - Complete import workflow and policy engine
+- [Policy Cookbook](docs/POLICY_COOKBOOK.md) - Policy engine examples and best practices
 - [Schema Outline](SCHEMA_OUTLINE.md) - Complete schema documentation
 - [Data Sources](DATA_SOURCES.md) - List of joke datasets and research
 - [Research](RESEARCH_CATEGORIZATION.md) - Scientific categorization approaches

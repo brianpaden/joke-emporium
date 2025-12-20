@@ -1,0 +1,44 @@
+# Default import policies for Joke Emporium
+# This file defines automated review rules for staging jokes
+
+policies:
+  # Auto-approve policies - jokes matching these rules are automatically approved
+  auto_approve:
+    - name: "high_quality_popular"
+      conditions:
+        - weighted_avg_funniness: ">= 4.0"
+        - total_ratings_count: ">= 10"
+      reason: "High quality with sufficient ratings"
+
+    - name: "verified_safe_content"
+      conditions:
+        - verified: true
+        - maturity_rating: "in ['G', 'PG']"
+      reason: "Verified safe content"
+
+  # Auto-reject policies - jokes matching these rules are automatically rejected
+  auto_reject:
+    - name: "low_quality_rated"
+      conditions:
+        - weighted_avg_funniness: "< 2.0"
+        - total_ratings_count: ">= 5"
+      reason: "Low quality with sufficient ratings to confirm"
+
+    - name: "empty_content"
+      conditions:
+        - text_preview: ""
+      reason: "Empty or missing content"
+
+  # Flag for review policies - jokes matching need manual review
+  flag_for_review:
+    - name: "mature_content"
+      conditions:
+        - maturity_rating: "in ['R', 'NC-17']"
+      reason: "Mature content requires manual review"
+
+    - name: "borderline_quality"
+      conditions:
+        - weighted_avg_funniness: ">= 2.0"
+        - weighted_avg_funniness: "< 3.0"
+        - total_ratings_count: ">= 3"
+      reason: "Borderline quality - manual verification needed"

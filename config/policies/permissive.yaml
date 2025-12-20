@@ -1,0 +1,166 @@
+# Permissive Quality-Based Policy Configuration
+# ==============================================
+# This policy focuses primarily on quality, accepting most content types.
+# It only rejects clearly problematic content (spam, deleted, very low quality).
+#
+# Use case: General entertainment platforms, comedy apps, social media
+#
+# Quality thresholds are based on 0-100 scale (normalized from taivop dataset)
+
+policies:
+  # -------------------------------------------------------------------------
+  # AUTO-APPROVE POLICIES
+  # Approve good quality content regardless of maturity rating
+  # -------------------------------------------------------------------------
+  auto_approve:
+    - name: "excellent_quality_any_content"
+      conditions:
+        - weighted_avg_funniness: ">= 80"
+        - total_ratings_count: ">= 10"
+        - flags.deleted: "false"
+        - flags.removed: "false"
+        - flags.is_test: "false"
+        - flags.spam: "false"
+      action: approve
+      reason: "Excellent quality content with strong community validation"
+      priority: 1
+
+    - name: "good_quality_established"
+      conditions:
+        - weighted_avg_funniness: ">= 70"
+        - total_ratings_count: ">= 8"
+        - flags.deleted: "false"
+        - flags.is_test: "false"
+      action: approve
+      reason: "Good quality with sufficient ratings"
+      priority: 2
+
+    - name: "solid_quality_rated"
+      conditions:
+        - weighted_avg_funniness: ">= 60"
+        - total_ratings_count: ">= 5"
+        - flags.deleted: "false"
+        - flags.removed: "false"
+        - flags.is_test: "false"
+      action: approve
+      reason: "Solid quality content meeting minimum standards"
+      priority: 3
+
+    - name: "highly_engaged_content"
+      conditions:
+        - engagement.upvotes: ">= 100"
+        - weighted_avg_funniness: ">= 50"
+        - flags.deleted: "false"
+        - flags.spam: "false"
+      action: approve
+      reason: "High engagement indicates valuable content"
+      priority: 4
+
+  # -------------------------------------------------------------------------
+  # AUTO-REJECT POLICIES
+  # Only reject clearly problematic content
+  # -------------------------------------------------------------------------
+  auto_reject:
+    - name: "deleted_content"
+      conditions:
+        - flags.deleted: "true"
+      action: reject
+      reason: "Content was deleted from source"
+      priority: 1
+
+    - name: "removed_content"
+      conditions:
+        - flags.removed: "true"
+      action: reject
+      reason: "Content was removed by moderators"
+      priority: 2
+
+    - name: "test_data"
+      conditions:
+        - flags.is_test: "true"
+      action: reject
+      reason: "Test data should not be imported"
+      priority: 3
+
+    - name: "spam_detected"
+      conditions:
+        - flags.spam: "true"
+      action: reject
+      reason: "Detected as spam content"
+      priority: 4
+
+    - name: "confirmed_low_quality"
+      conditions:
+        - weighted_avg_funniness: "< 20"
+        - total_ratings_count: ">= 5"
+      action: reject
+      reason: "Very low quality confirmed by community ratings"
+      priority: 5
+
+    - name: "extremely_low_quality"
+      conditions:
+        - weighted_avg_funniness: "< 10"
+        - total_ratings_count: ">= 3"
+      action: reject
+      reason: "Extremely low quality - not suitable for any platform"
+      priority: 6
+
+  # -------------------------------------------------------------------------
+  # FLAG FOR REVIEW POLICIES
+  # Minimal flagging - only for edge cases
+  # -------------------------------------------------------------------------
+  flag_for_review:
+    - name: "moderate_quality"
+      conditions:
+        - weighted_avg_funniness: ">= 40"
+        - weighted_avg_funniness: "< 60"
+        - total_ratings_count: ">= 5"
+      action: flag
+      reason: "Moderate quality - could go either way"
+      priority: 1
+
+    - name: "low_quality_some_ratings"
+      conditions:
+        - weighted_avg_funniness: ">= 20"
+        - weighted_avg_funniness: "< 40"
+        - total_ratings_count: ">= 3"
+      action: flag
+      reason: "Low quality but may have niche appeal"
+      priority: 2
+
+    - name: "insufficient_ratings"
+      conditions:
+        - total_ratings_count: "< 5"
+        - weighted_avg_funniness: ">= 50"
+      action: flag
+      reason: "Potentially good but needs more ratings for confidence"
+      priority: 3
+
+    - name: "no_ratings"
+      conditions:
+        - total_ratings_count: "< 1"
+      action: flag
+      reason: "No ratings - cannot assess quality automatically"
+      priority: 4
+
+    - name: "missing_maturity_info"
+      conditions:
+        - maturity_rating: "is_null"
+        - flags.nsfw: "is_null"
+      action: flag
+      reason: "Missing content classification metadata"
+      priority: 5
+
+    - name: "extreme_content_flags"
+      conditions:
+        - flags.gore: "true"
+      action: flag
+      reason: "Extreme content flag - verify appropriateness"
+      priority: 6
+
+    - name: "violence_flag"
+      conditions:
+        - flags.violence: "true"
+      action: flag
+      reason: "Violence flag - review content appropriateness"
+      priority: 7
